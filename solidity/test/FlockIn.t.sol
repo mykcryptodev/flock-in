@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 
 import "forge-std/Test.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "../contracts/FlockIn.sol";
+import "../src/FlockIn.sol";
 
 contract MockToken is ERC20 {
     constructor() ERC20("Mock Token", "MTK") {
