@@ -1,4 +1,4 @@
-import { sendFrameNotification } from "@/lib/notification-client";
+import { sendFrameNotification } from "@/app/lib/notification-client";
 
 export async function POST(request: Request) {
   try {
