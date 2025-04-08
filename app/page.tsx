@@ -10,6 +10,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAccount } from "wagmi";
 import Check from "./svg/Check";
 import { UserSearch } from "./components/UserSearch";
+import { useUserStore } from "./store/userStore";
+import { VideoRequest } from "./components/VideoRequest";
 
 const SCHEMA_UID =
   "0x7889a09fb295b0a0c63a3d7903c4f00f7896cca4fa64d2c1313f8547390b7d39";
@@ -32,6 +34,8 @@ export default function App() {
     const frameAdded = await addFrame();
     setFrameAdded(Boolean(frameAdded));
   }, [addFrame, setFrameAdded]);
+
+  const { selectedUser } = useUserStore();
 
   const saveFrameButton = useMemo(() => {
     if (context && !context.client.added) {
@@ -87,6 +91,7 @@ export default function App() {
 
         <main className="font-serif">
           <UserSearch />
+          {selectedUser && <VideoRequest />}
         </main>
 
         <footer className="absolute bottom-4 flex items-center w-screen max-w-[520px] justify-center">
