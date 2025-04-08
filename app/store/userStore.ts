@@ -6,6 +6,12 @@ export interface FarcasterUser {
   username: string;
   display_name: string;
   pfp_url: string;
+  custody_address: string;
+  verified_addresses: {
+    primary: {
+      eth_address?: string;
+    }
+  };
 }
 
 interface UserState {

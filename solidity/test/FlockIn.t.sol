@@ -101,7 +101,7 @@ contract FlockInTest is Test {
         vm.stopPrank();
     }
 
-    function testFail_CompleteRequestAsNonCompleter() public {
+    function test_RevertWhen_CompleteRequestAsNonCompleter() public {
         // Create request
         vm.startPrank(alice);
         token.approve(address(flockIn), type(uint256).max);
@@ -110,10 +110,11 @@ contract FlockInTest is Test {
         
         // Try to complete as Charlie
         vm.startPrank(charlie);
+        vm.expectRevert("Not the intended completer");
         flockIn.completeRequest(0);
     }
 
-    function testFail_CancelRequestAsNonRequester() public {
+    function test_RevertWhen_CancelRequestAsNonRequester() public {
         // Create request
         vm.startPrank(alice);
         token.approve(address(flockIn), type(uint256).max);
@@ -122,10 +123,11 @@ contract FlockInTest is Test {
         
         // Try to cancel as Bob
         vm.startPrank(bob);
+        vm.expectRevert("Not the requester");
         flockIn.cancelRequest(0);
     }
 
-    function testFail_CompleteRequestAfterCancellation() public {
+    function test_RevertWhen_CompleteRequestAfterCancellation() public {
         // Create request
         vm.startPrank(alice);
         token.approve(address(flockIn), type(uint256).max);
@@ -137,10 +139,11 @@ contract FlockInTest is Test {
         
         // Try to complete as Bob
         vm.startPrank(bob);
+        vm.expectRevert("Already claimed");
         flockIn.completeRequest(0);
     }
 
-    function testFail_CancelRequestAfterCompletion() public {
+    function test_RevertWhen_CancelRequestAfterCompletion() public {
         // Create request
         vm.startPrank(alice);
         token.approve(address(flockIn), type(uint256).max);
@@ -154,10 +157,11 @@ contract FlockInTest is Test {
         
         // Try to cancel as Alice
         vm.startPrank(alice);
+        vm.expectRevert("Request already claimed");
         flockIn.cancelRequest(0);
     }
 
-    function testFail_CompleteRequestTwice() public {
+    function test_RevertWhen_CompleteRequestTwice() public {
         // Create request
         vm.startPrank(alice);
         token.approve(address(flockIn), type(uint256).max);
@@ -169,10 +173,11 @@ contract FlockInTest is Test {
         flockIn.completeRequest(0);
         
         // Try to complete again
+        vm.expectRevert("Already claimed");
         flockIn.completeRequest(0);
     }
 
-    function testFail_CancelRequestTwice() public {
+    function test_RevertWhen_CancelRequestTwice() public {
         // Create request
         vm.startPrank(alice);
         token.approve(address(flockIn), type(uint256).max);
@@ -182,6 +187,7 @@ contract FlockInTest is Test {
         flockIn.cancelRequest(0);
         
         // Try to cancel again
+        vm.expectRevert("Request already claimed");
         flockIn.cancelRequest(0);
     }
 } 
