@@ -10,7 +10,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAccount, useConnect } from "wagmi";
 import Check from "./svg/Check";
 import { UserSearch } from "./components/UserSearch";
-import { useUserStore } from "./store/userStore";
 import { CreateRequest } from "./components/CreateRequest";
 import connector from "@farcaster/frame-wagmi-connector";
 import { RequestsCreatedByMe } from "./components/RequestsCreatedByMe";
