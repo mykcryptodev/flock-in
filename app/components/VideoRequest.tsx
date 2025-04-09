@@ -1,10 +1,11 @@
 import { Transaction, TransactionButton } from "@coinbase/onchainkit/transaction";
-import { FC, useCallback, useState } from "react";
-import { requestFlockIn } from "@/thirdweb/8453/0x6a89bdbe3599ffde6c7e98549d736171c7f8c82f";
+import { FC, useCallback, useMemo, useState } from "react";
+import { REQUEST_AMOUNT, requestFlockIn } from "@/thirdweb/8453/0x6a89bdbe3599ffde6c7e98549d736171c7f8c82f";
 import { useUserStore } from "../store/userStore";
 import { createThirdwebClient, encode, getContract } from "thirdweb";
-import { CONTRACT } from "../constants";
+import { CONTRACT, TOKEN } from "../constants";
 import { base } from "thirdweb/chains";
+import { approve } from "thirdweb/extensions/erc20";
 
 const MAX_CHARS = 300;
 
@@ -23,11 +24,25 @@ export const VideoRequest: FC = () => {
     }
   };
 
+  const requestAmount = useMemo(() => {
+    return REQUEST_AMOUNT.toString();
+  }, []);
+
   const getCalls = useCallback(async () => {
     const completerAddress = selectedUser?.verified_addresses?.primary?.eth_address ?? selectedUser?.custody_address;
     if (!completerAddress) {
       return [];
     }
+    const approvalTx = approve({
+      contract: getContract({
+        address: TOKEN,
+        client,
+        chain: base,
+      }),
+      amount: requestAmount,
+      spender: CONTRACT,
+    });
+    const encodedApprovalTx = await encode(approvalTx);
     const tx = requestFlockIn({
       contract: getContract({
         address: CONTRACT,
@@ -38,12 +53,18 @@ export const VideoRequest: FC = () => {
       completer: completerAddress,
       completerFid: BigInt(selectedUser?.fid ?? 0),
     });
-    const encoded = await encode(tx);
-    return [{
-      to: CONTRACT as `0x${string}`,
-      data: encoded,
-    }];
-  }, [selectedUser]);
+    const encodedTx = await encode(tx);
+    return [
+      {
+        to: TOKEN,
+        data: encodedApprovalTx,
+      },
+      {
+        to: CONTRACT,
+        data: encodedTx,
+      },
+    ];
+  }, [selectedUser, requestAmount]);
 
   return (
     <div>

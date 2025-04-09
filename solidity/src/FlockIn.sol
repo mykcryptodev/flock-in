@@ -20,7 +20,11 @@ contract FlockIn is ReentrancyGuard {
         uint256 completerFid; // Farcaster ID of the intended completer (Bob)
         uint256 amount;    // Amount of tokens requested
         bool isClaimed;    // Whether the request has been claimed or cancelled
+        string message;    // Message from the requester to the completer
     }
+
+    mapping(address => Request[]) public requestsMade;
+    mapping(address => Request[]) public requestsReceived;
 
     /// @notice The ERC20 token used for requests
     IERC20 public immutable token;
@@ -67,7 +71,8 @@ contract FlockIn is ReentrancyGuard {
     function requestFlockIn(
         uint256 requesterFid,
         address completer,
-        uint256 completerFid
+        uint256 completerFid,
+        string memory message
     ) external nonReentrant {
         require(completer != address(0), "Invalid completer address");
         token.safeTransferFrom(msg.sender, address(this), REQUEST_AMOUNT);
@@ -79,10 +84,11 @@ contract FlockIn is ReentrancyGuard {
             completer: completer,
             completerFid: completerFid,
             amount: REQUEST_AMOUNT,
-            isClaimed: false
+            isClaimed: false,
+            message: message
         });
 
-        emit RequestCreated(requestId, msg.sender, completer, REQUEST_AMOUNT);
+        emit RequestCreated(requestId, msg.sender, completer, REQUEST_AMOUNT, message);
     }
 
     /// @notice Completes a request and transfers the funds to the completer
@@ -111,5 +117,19 @@ contract FlockIn is ReentrancyGuard {
         token.safeTransfer(msg.sender, request.amount);
         
         emit RequestCancelled(requestId, msg.sender);
+    }
+
+    /// @notice Gets all requests made by the caller
+    /// @return An array of Request structs representing all requests made by the caller
+    /// @dev Returns requests from the requestsMade mapping for msg.sender
+    function getRequestsMade() external view returns (Request[] memory) {
+        return requestsMade[msg.sender];
+    }
+
+    /// @notice Gets all requests received by the caller
+    /// @return An array of Request structs representing all requests where caller is the completer
+    /// @dev Returns requests from the requestsReceived mapping for msg.sender
+    function getRequestsReceived() external view returns (Request[] memory) {
+        return requestsReceived[msg.sender];
     }
 }
