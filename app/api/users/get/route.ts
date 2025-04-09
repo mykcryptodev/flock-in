@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getCachedData, setCachedData } from '@/app/services/redis';
 
 // Neynar API endpoint for user bulk lookup
 const NEYNAR_API_URL = 'https://api.neynar.com/v2/farcaster/user/bulk';
 const NEYNAR_API_KEY = process.env.NEYNAR_API_KEY;
+
+// Cache key prefix for user data
+const USER_CACHE_PREFIX = 'user:';
 
 /**
  * GET handler for fetching user information from Neynar bulk API
@@ -31,6 +35,16 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Create a cache key based on the FIDs
+    const cacheKey = `${USER_CACHE_PREFIX}${fids}`;
+    
+    // Check if we have cached data for these FIDs
+    const cachedData = await getCachedData(cacheKey);
+    if (cachedData) {
+      console.log('Using cached user data');
+      return NextResponse.json(cachedData);
+    }
+
     // Make the request to Neynar API
     const response = await fetch(`${NEYNAR_API_URL}?fids=${encodeURIComponent(fids)}`, {
       method: 'GET',
@@ -51,8 +65,12 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Parse and return the response
+    // Parse the response
     const data = await response.json();
+    
+    // Cache the response data
+    await setCachedData(cacheKey, data);
+    
     return NextResponse.json(data);
   } catch (error) {
     console.error('Error fetching user data:', error);

@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server';
+import { getCachedData, setCachedData } from '@/app/services/redis';
 
 const NEYNAR_API_KEY = process.env.NEYNAR_API_KEY;
 const NEYNAR_API_URL = 'https://api.neynar.com/v2/farcaster/user/search';
+
+// Cache key prefix for user search results
+const USER_SEARCH_CACHE_PREFIX = 'user_search:';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -16,6 +20,16 @@ export async function GET(request: Request) {
   }
 
   try {
+    // Create a cache key based on the search query
+    const cacheKey = `${USER_SEARCH_CACHE_PREFIX}${query}`;
+    
+    // Check if we have cached data for this search query
+    const cachedData = await getCachedData(cacheKey);
+    if (cachedData) {
+      console.log('Using cached search results');
+      return NextResponse.json(cachedData);
+    }
+
     const response = await fetch(`${NEYNAR_API_URL}?q=${encodeURIComponent(query)}`, {
       headers: {
         'accept': 'application/json',
@@ -29,6 +43,10 @@ export async function GET(request: Request) {
     }
 
     const data = await response.json();
+    
+    // Cache the response data
+    await setCachedData(cacheKey, data);
+    
     return NextResponse.json(data);
   } catch (error) {
     console.error('Error searching users:', error);
