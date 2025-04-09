@@ -1,5 +1,5 @@
 import { FC, useEffect, useState } from "react";
-import { getRequestsReceivedByFid } from "@/thirdweb/8453/0xd3807cf5f5c3f73f79ba32afd65436f336982965";
+import { getRequestsReceivedByFid } from "@/thirdweb/8453/0xbe0463eee6e6b0c290ab6b310317a68829254546";
 import { useMiniKit } from "@coinbase/onchainkit/minikit";
 import { CONTRACT } from "../constants";
 import { createThirdwebClient, getContract } from "thirdweb";

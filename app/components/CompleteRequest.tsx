@@ -1,4 +1,4 @@
-import { completeRequest } from "@/thirdweb/8453/0xd3807cf5f5c3f73f79ba32afd65436f336982965";
+import { completeRequest } from "@/thirdweb/8453/0xbe0463eee6e6b0c290ab6b310317a68829254546";
 import { Transaction } from "@coinbase/onchainkit/transaction";
 import { TransactionButton } from "@coinbase/onchainkit/transaction";
 import { FC } from "react";
