@@ -2,8 +2,8 @@ import { Transaction, TransactionButton } from "@coinbase/onchainkit/transaction
 import { FC, useCallback, useEffect, useState } from "react";
 import { REQUEST_AMOUNT, requestFlockIn } from "@/thirdweb/8453/0xd3807cf5f5c3f73f79ba32afd65436f336982965";
 import { useUserStore } from "../store/userStore";
-import { createThirdwebClient, encode, getContract } from "thirdweb";
-import { CONTRACT, TOKEN } from "../constants";
+import { createThirdwebClient, encode, getContract, toTokens } from "thirdweb";
+import { CONTRACT, TOKEN, TOKEN_DECIMALS } from "../constants";
 import { base } from "thirdweb/chains";
 import { allowance, approve, balanceOf } from "thirdweb/extensions/erc20";
 import { useAccount } from "wagmi";
@@ -25,6 +25,7 @@ export const CreateRequest: FC<Props> = ({ onSuccess }) => {
   const { context } = useMiniKit();
   const [videoDescription, setVideoDescription] = useState('');
   const [approvalRequired, setApprovalRequired] = useState(false);
+  const [balance, setBalance] = useState<bigint>(BigInt(0));
   const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const text = e.target.value;
     if (text.length <= MAX_CHARS) {
@@ -190,6 +191,9 @@ export const CreateRequest: FC<Props> = ({ onSuccess }) => {
           />
         </Transaction>
       )}
+      <div className="text-sm text-gray-500 mt-2 text-right">
+        Your balance: {toTokens(balance, TOKEN_DECIMALS).toString()}
+      </div>
     </div>
   );
 };
