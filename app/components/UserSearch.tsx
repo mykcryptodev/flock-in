@@ -27,7 +27,6 @@ export const UserSearch: FC = () => {
           throw new Error('Failed to fetch users');
         }
         const data = await response.json();
-        console.log({data});
         setUsers(data.result.users || []);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
