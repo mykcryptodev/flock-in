@@ -13,7 +13,8 @@ import { UserSearch } from "./components/UserSearch";
 import { useUserStore } from "./store/userStore";
 import { VideoRequest } from "./components/VideoRequest";
 import connector from "@farcaster/frame-wagmi-connector";
-import { MyRequests } from "./components/MyRequests";
+import { RequestsCreatedByMe } from "./components/RequestsCreatedByMe";
+import { RequestsCreatedForMe } from "./components/RequestsCreatedForMe";
 
 const SCHEMA_UID =
   "0x7889a09fb295b0a0c63a3d7903c4f00f7896cca4fa64d2c1313f8547390b7d39";
@@ -32,6 +33,12 @@ export default function App() {
       setFrameReady();
     }
   }, [setFrameReady, isFrameReady]);
+
+  useEffect(() => {
+    if (context && !address) {
+      connect({ connector: connector() });
+    }
+  }, [context, connect, address]);
 
   const handleAddFrame = useCallback(async () => {
     const frameAdded = await addFrame();
@@ -68,7 +75,7 @@ export default function App() {
   return (
     <div className="flex flex-col min-h-screen sm:min-h-[820px] font-sans bg-[#E5E5E5] text-black items-center snake-dark relative">
       <div className="w-screen max-w-[520px]">
-        <header className="mr-2 mt-1 flex justify-between">
+        <header className="mr-2 mt-4 flex justify-between items-center">
           <div className="justify-start pl-1">
             {address ? (
               <Identity
@@ -85,17 +92,18 @@ export default function App() {
               </Identity>
             ) : (
               <div className="pl-2 pt-1 text-gray-500 text-sm font-semibold">
-                <button onClick={() => connect({ connector: connector() })}>CONNECT</button>
+                Connecting...
               </div>
             )}
           </div>
           <div className="pr-1 justify-end">{saveFrameButton}</div>
         </header>
 
-        <main className="font-serif">
+        <main className="font-serif px-2 flex flex-col gap-2 mt-4">
           <UserSearch />
           {selectedUser && <VideoRequest />}
-          <MyRequests />
+          <RequestsCreatedByMe />
+          <RequestsCreatedForMe />
         </main>
 
         <footer className="absolute bottom-4 flex items-center w-screen max-w-[520px] justify-center">

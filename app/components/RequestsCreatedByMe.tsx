@@ -11,7 +11,7 @@ const client = createThirdwebClient({
   clientId: process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID!,
 });
 
-export const MyRequests: FC = () => {
+export const RequestsCreatedByMe: FC = () => {
   const { context } = useMiniKit();
   const [requests, setRequests] = useState<Awaited<ReturnType<typeof getRequestsMadeByFid>>>([]);
 
@@ -35,7 +35,7 @@ export const MyRequests: FC = () => {
 
   return (
     <div className="flex flex-col gap-2">
-      <div>My Requests</div>
+      <div>Requests I Made</div>
       {requests.map((request) => (
         <div key={request.id.toString()}>
           <CancelRequest requestId={request.id.toString()} />
