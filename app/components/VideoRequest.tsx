@@ -1,6 +1,6 @@
 import { Transaction, TransactionButton } from "@coinbase/onchainkit/transaction";
 import { FC, useCallback, useEffect, useState } from "react";
-import { REQUEST_AMOUNT, requestFlockIn } from "@/thirdweb/8453/0x6697c2fcd1f155da0cb3c0c887ecff24a664a1fe";
+import { REQUEST_AMOUNT, requestFlockIn } from "@/thirdweb/8453/0x2f530532213d5c1a8c80d7d69438751116ff6af1";
 import { useUserStore } from "../store/userStore";
 import { createThirdwebClient, encode, getContract } from "thirdweb";
 import { CONTRACT, TOKEN } from "../constants";

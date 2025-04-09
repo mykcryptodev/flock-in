@@ -14,6 +14,7 @@ contract FlockIn is ReentrancyGuard {
     /// @notice Structure to store request information
     /// @dev Contains requester and completer details, amount, and claim status
     struct Request {
+        uint256 id; // the id of the request
         address requester;  // Address of the request requester (Alice)
         uint256 requesterFid; // Farcaster ID of the requester (Alice)
         address completer;  // Address of the intended completer (Bob)
@@ -23,15 +24,17 @@ contract FlockIn is ReentrancyGuard {
         string message;    // Message from the requester to the completer
     }
 
-    mapping(address => Request[]) public requestsMade;
-    mapping(address => Request[]) public requestsReceived;
+    mapping(address => Request[]) public requestsMadeByAddress;
+    mapping(address => Request[]) public requestsReceivedByAddress;
+    mapping(uint256 => Request[]) public requestsMadeByFid;
+    mapping(uint256 => Request[]) public requestsReceivedByFid;
 
     /// @notice The ERC20 token used for requests
     IERC20 public immutable token;
 
     /// @notice The fixed amount required for each request
-    /// @dev Set to 4500 tokens (assuming 18 decimals)
-    uint256 public constant REQUEST_AMOUNT = 4500 * 10**18;
+    /// @dev Set to 4500 tokens (assuming 6 decimals)
+    uint256 public constant REQUEST_AMOUNT = 10 * 10**6;
     
     /// @notice Mapping of request IDs to Request structs
     mapping(uint256 => Request) public requests;
@@ -44,7 +47,7 @@ contract FlockIn is ReentrancyGuard {
     /// @param requester The address of the request requester
     /// @param completer The address of the intended completer
     /// @param amount The amount of tokens requested
-    event RequestCreated(uint256 indexed requestId, address indexed requester, address indexed completer, uint256 amount);
+    event RequestCreated(uint256 indexed requestId, address indexed requester, address indexed completer, uint256 amount, string message);
 
     /// @notice Emitted when a request is completed and funds are claimed
     /// @param requestId The ID of the completed request
@@ -79,6 +82,7 @@ contract FlockIn is ReentrancyGuard {
         
         uint256 requestId = requestCounter++;
         requests[requestId] = Request({
+            id: requestId,
             requester: msg.sender,
             requesterFid: requesterFid,
             completer: completer,
@@ -87,6 +91,11 @@ contract FlockIn is ReentrancyGuard {
             isClaimed: false,
             message: message
         });
+        
+        requestsMadeByAddress[msg.sender].push(requests[requestId]);
+        requestsReceivedByAddress[completer].push(requests[requestId]);
+        requestsMadeByFid[requesterFid].push(requests[requestId]);
+        requestsReceivedByFid[completerFid].push(requests[requestId]);
 
         emit RequestCreated(requestId, msg.sender, completer, REQUEST_AMOUNT, message);
     }
@@ -119,17 +128,35 @@ contract FlockIn is ReentrancyGuard {
         emit RequestCancelled(requestId, msg.sender);
     }
 
-    /// @notice Gets all requests made by the caller
-    /// @return An array of Request structs representing all requests made by the caller
-    /// @dev Returns requests from the requestsMade mapping for msg.sender
-    function getRequestsMade() external view returns (Request[] memory) {
-        return requestsMade[msg.sender];
+    /// @notice Gets all requests made by a specific address
+    /// @param requester The address to get requests for
+    /// @return An array of Request structs representing all requests made by the requester
+    /// @dev Returns requests from the requestsMadeByAddress mapping for the given address
+    function getRequestsMadeByAddress(address requester) external view returns (Request[] memory) {
+        return requestsMadeByAddress[requester];
     }
 
-    /// @notice Gets all requests received by the caller
-    /// @return An array of Request structs representing all requests where caller is the completer
-    /// @dev Returns requests from the requestsReceived mapping for msg.sender
-    function getRequestsReceived() external view returns (Request[] memory) {
-        return requestsReceived[msg.sender];
+    /// @notice Gets all requests received by a specific address
+    /// @param completer The address to get requests for
+    /// @return An array of Request structs representing all requests where completer is the intended recipient
+    /// @dev Returns requests from the requestsReceivedByAddress mapping for the given address
+    function getRequestsReceivedByAddress(address completer) external view returns (Request[] memory) {
+        return requestsReceivedByAddress[completer];
+    }
+
+    /// @notice Gets all requests made by a specific Farcaster ID
+    /// @param requesterFid The Farcaster ID to get requests for
+    /// @return An array of Request structs representing all requests made by the given Farcaster ID
+    /// @dev Returns requests from the requestsMadeByFid mapping for the given FID
+    function getRequestsMadeByFid(uint256 requesterFid) external view returns (Request[] memory) {
+        return requestsMadeByFid[requesterFid];
+    }
+
+    /// @notice Gets all requests received by a specific Farcaster ID
+    /// @param completerFid The Farcaster ID to get requests for
+    /// @return An array of Request structs representing all requests where the given Farcaster ID is the intended recipient
+    /// @dev Returns requests from the requestsReceivedByFid mapping for the given FID
+    function getRequestsReceivedByFid(uint256 completerFid) external view returns (Request[] memory) {
+        return requestsReceivedByFid[completerFid];
     }
 }

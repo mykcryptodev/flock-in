@@ -13,6 +13,7 @@ import { UserSearch } from "./components/UserSearch";
 import { useUserStore } from "./store/userStore";
 import { VideoRequest } from "./components/VideoRequest";
 import connector from "@farcaster/frame-wagmi-connector";
+import { MyRequests } from "./components/MyRequests";
 
 const SCHEMA_UID =
   "0x7889a09fb295b0a0c63a3d7903c4f00f7896cca4fa64d2c1313f8547390b7d39";
@@ -94,6 +95,7 @@ export default function App() {
         <main className="font-serif">
           <UserSearch />
           {selectedUser && <VideoRequest />}
+          <MyRequests />
         </main>
 
         <footer className="absolute bottom-4 flex items-center w-screen max-w-[520px] justify-center">

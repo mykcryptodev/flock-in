@@ -159,31 +159,49 @@ export async function REQUEST_AMOUNT(
 };
 
 
-
+/**
+ * Represents the parameters for the "getRequestsMadeByAddress" function.
+ */
+export type GetRequestsMadeByAddressParams = {
+  requester: AbiParameterToPrimitiveType<{"internalType":"address","name":"requester","type":"address"}>
+};
 
 /**
- * Calls the "getRequestsMade" function on the contract.
- * @param options - The options for the getRequestsMade function.
+ * Calls the "getRequestsMadeByAddress" function on the contract.
+ * @param options - The options for the getRequestsMadeByAddress function.
  * @returns The parsed result of the function call.
  * @example
  * ```
- * import { getRequestsMade } from "TODO";
+ * import { getRequestsMadeByAddress } from "TODO";
  *
- * const result = await getRequestsMade();
+ * const result = await getRequestsMadeByAddress({
+ *  requester: ...,
+ * });
  *
  * ```
  */
-export async function getRequestsMade(
-  options: BaseTransactionOptions
+export async function getRequestsMadeByAddress(
+  options: BaseTransactionOptions<GetRequestsMadeByAddressParams>
 ) {
   return readContract({
     contract: options.contract,
     method: [
-  "0xb2e41e09",
-  [],
+  "0x34d47e0a",
+  [
+    {
+      "internalType": "address",
+      "name": "requester",
+      "type": "address"
+    }
+  ],
   [
     {
       "components": [
+        {
+          "internalType": "uint256",
+          "name": "id",
+          "type": "uint256"
+        },
         {
           "internalType": "address",
           "name": "requester",
@@ -226,36 +244,54 @@ export async function getRequestsMade(
     }
   ]
 ],
-    params: []
+    params: [options.requester]
   });
 };
 
 
-
+/**
+ * Represents the parameters for the "getRequestsMadeByFid" function.
+ */
+export type GetRequestsMadeByFidParams = {
+  requesterFid: AbiParameterToPrimitiveType<{"internalType":"uint256","name":"requesterFid","type":"uint256"}>
+};
 
 /**
- * Calls the "getRequestsReceived" function on the contract.
- * @param options - The options for the getRequestsReceived function.
+ * Calls the "getRequestsMadeByFid" function on the contract.
+ * @param options - The options for the getRequestsMadeByFid function.
  * @returns The parsed result of the function call.
  * @example
  * ```
- * import { getRequestsReceived } from "TODO";
+ * import { getRequestsMadeByFid } from "TODO";
  *
- * const result = await getRequestsReceived();
+ * const result = await getRequestsMadeByFid({
+ *  requesterFid: ...,
+ * });
  *
  * ```
  */
-export async function getRequestsReceived(
-  options: BaseTransactionOptions
+export async function getRequestsMadeByFid(
+  options: BaseTransactionOptions<GetRequestsMadeByFidParams>
 ) {
   return readContract({
     contract: options.contract,
     method: [
-  "0xcd5f63c3",
-  [],
+  "0xe0fc7264",
+  [
+    {
+      "internalType": "uint256",
+      "name": "requesterFid",
+      "type": "uint256"
+    }
+  ],
   [
     {
       "components": [
+        {
+          "internalType": "uint256",
+          "name": "id",
+          "type": "uint256"
+        },
         {
           "internalType": "address",
           "name": "requester",
@@ -298,7 +334,187 @@ export async function getRequestsReceived(
     }
   ]
 ],
-    params: []
+    params: [options.requesterFid]
+  });
+};
+
+
+/**
+ * Represents the parameters for the "getRequestsReceivedByAddress" function.
+ */
+export type GetRequestsReceivedByAddressParams = {
+  completer: AbiParameterToPrimitiveType<{"internalType":"address","name":"completer","type":"address"}>
+};
+
+/**
+ * Calls the "getRequestsReceivedByAddress" function on the contract.
+ * @param options - The options for the getRequestsReceivedByAddress function.
+ * @returns The parsed result of the function call.
+ * @example
+ * ```
+ * import { getRequestsReceivedByAddress } from "TODO";
+ *
+ * const result = await getRequestsReceivedByAddress({
+ *  completer: ...,
+ * });
+ *
+ * ```
+ */
+export async function getRequestsReceivedByAddress(
+  options: BaseTransactionOptions<GetRequestsReceivedByAddressParams>
+) {
+  return readContract({
+    contract: options.contract,
+    method: [
+  "0x64a18c46",
+  [
+    {
+      "internalType": "address",
+      "name": "completer",
+      "type": "address"
+    }
+  ],
+  [
+    {
+      "components": [
+        {
+          "internalType": "uint256",
+          "name": "id",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "requester",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "requesterFid",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "completer",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "completerFid",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bool",
+          "name": "isClaimed",
+          "type": "bool"
+        },
+        {
+          "internalType": "string",
+          "name": "message",
+          "type": "string"
+        }
+      ],
+      "internalType": "struct FlockIn.Request[]",
+      "name": "",
+      "type": "tuple[]"
+    }
+  ]
+],
+    params: [options.completer]
+  });
+};
+
+
+/**
+ * Represents the parameters for the "getRequestsReceivedByFid" function.
+ */
+export type GetRequestsReceivedByFidParams = {
+  completerFid: AbiParameterToPrimitiveType<{"internalType":"uint256","name":"completerFid","type":"uint256"}>
+};
+
+/**
+ * Calls the "getRequestsReceivedByFid" function on the contract.
+ * @param options - The options for the getRequestsReceivedByFid function.
+ * @returns The parsed result of the function call.
+ * @example
+ * ```
+ * import { getRequestsReceivedByFid } from "TODO";
+ *
+ * const result = await getRequestsReceivedByFid({
+ *  completerFid: ...,
+ * });
+ *
+ * ```
+ */
+export async function getRequestsReceivedByFid(
+  options: BaseTransactionOptions<GetRequestsReceivedByFidParams>
+) {
+  return readContract({
+    contract: options.contract,
+    method: [
+  "0x7f7134c9",
+  [
+    {
+      "internalType": "uint256",
+      "name": "completerFid",
+      "type": "uint256"
+    }
+  ],
+  [
+    {
+      "components": [
+        {
+          "internalType": "uint256",
+          "name": "id",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "requester",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "requesterFid",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "completer",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "completerFid",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bool",
+          "name": "isClaimed",
+          "type": "bool"
+        },
+        {
+          "internalType": "string",
+          "name": "message",
+          "type": "string"
+        }
+      ],
+      "internalType": "struct FlockIn.Request[]",
+      "name": "",
+      "type": "tuple[]"
+    }
+  ]
+],
+    params: [options.completerFid]
   });
 };
 
@@ -375,6 +591,11 @@ export async function requests(
   ],
   [
     {
+      "internalType": "uint256",
+      "name": "id",
+      "type": "uint256"
+    },
+    {
       "internalType": "address",
       "name": "requester",
       "type": "address"
@@ -417,35 +638,35 @@ export async function requests(
 
 
 /**
- * Represents the parameters for the "requestsMade" function.
+ * Represents the parameters for the "requestsMadeByAddress" function.
  */
-export type RequestsMadeParams = {
+export type RequestsMadeByAddressParams = {
   arg_0: AbiParameterToPrimitiveType<{"internalType":"address","name":"","type":"address"}>
 arg_1: AbiParameterToPrimitiveType<{"internalType":"uint256","name":"","type":"uint256"}>
 };
 
 /**
- * Calls the "requestsMade" function on the contract.
- * @param options - The options for the requestsMade function.
+ * Calls the "requestsMadeByAddress" function on the contract.
+ * @param options - The options for the requestsMadeByAddress function.
  * @returns The parsed result of the function call.
  * @example
  * ```
- * import { requestsMade } from "TODO";
+ * import { requestsMadeByAddress } from "TODO";
  *
- * const result = await requestsMade({
+ * const result = await requestsMadeByAddress({
  *  arg_0: ...,
  *  arg_1: ...,
  * });
  *
  * ```
  */
-export async function requestsMade(
-  options: BaseTransactionOptions<RequestsMadeParams>
+export async function requestsMadeByAddress(
+  options: BaseTransactionOptions<RequestsMadeByAddressParams>
 ) {
   return readContract({
     contract: options.contract,
     method: [
-  "0x7712b867",
+  "0xbc5adc3e",
   [
     {
       "internalType": "address",
@@ -459,6 +680,11 @@ export async function requestsMade(
     }
   ],
   [
+    {
+      "internalType": "uint256",
+      "name": "id",
+      "type": "uint256"
+    },
     {
       "internalType": "address",
       "name": "requester",
@@ -502,35 +728,125 @@ export async function requestsMade(
 
 
 /**
- * Represents the parameters for the "requestsReceived" function.
+ * Represents the parameters for the "requestsMadeByFid" function.
  */
-export type RequestsReceivedParams = {
-  arg_0: AbiParameterToPrimitiveType<{"internalType":"address","name":"","type":"address"}>
+export type RequestsMadeByFidParams = {
+  arg_0: AbiParameterToPrimitiveType<{"internalType":"uint256","name":"","type":"uint256"}>
 arg_1: AbiParameterToPrimitiveType<{"internalType":"uint256","name":"","type":"uint256"}>
 };
 
 /**
- * Calls the "requestsReceived" function on the contract.
- * @param options - The options for the requestsReceived function.
+ * Calls the "requestsMadeByFid" function on the contract.
+ * @param options - The options for the requestsMadeByFid function.
  * @returns The parsed result of the function call.
  * @example
  * ```
- * import { requestsReceived } from "TODO";
+ * import { requestsMadeByFid } from "TODO";
  *
- * const result = await requestsReceived({
+ * const result = await requestsMadeByFid({
  *  arg_0: ...,
  *  arg_1: ...,
  * });
  *
  * ```
  */
-export async function requestsReceived(
-  options: BaseTransactionOptions<RequestsReceivedParams>
+export async function requestsMadeByFid(
+  options: BaseTransactionOptions<RequestsMadeByFidParams>
 ) {
   return readContract({
     contract: options.contract,
     method: [
-  "0x52a2c718",
+  "0xc2cafa42",
+  [
+    {
+      "internalType": "uint256",
+      "name": "",
+      "type": "uint256"
+    },
+    {
+      "internalType": "uint256",
+      "name": "",
+      "type": "uint256"
+    }
+  ],
+  [
+    {
+      "internalType": "uint256",
+      "name": "id",
+      "type": "uint256"
+    },
+    {
+      "internalType": "address",
+      "name": "requester",
+      "type": "address"
+    },
+    {
+      "internalType": "uint256",
+      "name": "requesterFid",
+      "type": "uint256"
+    },
+    {
+      "internalType": "address",
+      "name": "completer",
+      "type": "address"
+    },
+    {
+      "internalType": "uint256",
+      "name": "completerFid",
+      "type": "uint256"
+    },
+    {
+      "internalType": "uint256",
+      "name": "amount",
+      "type": "uint256"
+    },
+    {
+      "internalType": "bool",
+      "name": "isClaimed",
+      "type": "bool"
+    },
+    {
+      "internalType": "string",
+      "name": "message",
+      "type": "string"
+    }
+  ]
+],
+    params: [options.arg_0, options.arg_1]
+  });
+};
+
+
+/**
+ * Represents the parameters for the "requestsReceivedByAddress" function.
+ */
+export type RequestsReceivedByAddressParams = {
+  arg_0: AbiParameterToPrimitiveType<{"internalType":"address","name":"","type":"address"}>
+arg_1: AbiParameterToPrimitiveType<{"internalType":"uint256","name":"","type":"uint256"}>
+};
+
+/**
+ * Calls the "requestsReceivedByAddress" function on the contract.
+ * @param options - The options for the requestsReceivedByAddress function.
+ * @returns The parsed result of the function call.
+ * @example
+ * ```
+ * import { requestsReceivedByAddress } from "TODO";
+ *
+ * const result = await requestsReceivedByAddress({
+ *  arg_0: ...,
+ *  arg_1: ...,
+ * });
+ *
+ * ```
+ */
+export async function requestsReceivedByAddress(
+  options: BaseTransactionOptions<RequestsReceivedByAddressParams>
+) {
+  return readContract({
+    contract: options.contract,
+    method: [
+  "0xf0779f79",
   [
     {
       "internalType": "address",
@@ -544,6 +860,101 @@ export async function requestsReceived(
     }
   ],
   [
+    {
+      "internalType": "uint256",
+      "name": "id",
+      "type": "uint256"
+    },
+    {
+      "internalType": "address",
+      "name": "requester",
+      "type": "address"
+    },
+    {
+      "internalType": "uint256",
+      "name": "requesterFid",
+      "type": "uint256"
+    },
+    {
+      "internalType": "address",
+      "name": "completer",
+      "type": "address"
+    },
+    {
+      "internalType": "uint256",
+      "name": "completerFid",
+      "type": "uint256"
+    },
+    {
+      "internalType": "uint256",
+      "name": "amount",
+      "type": "uint256"
+    },
+    {
+      "internalType": "bool",
+      "name": "isClaimed",
+      "type": "bool"
+    },
+    {
+      "internalType": "string",
+      "name": "message",
+      "type": "string"
+    }
+  ]
+],
+    params: [options.arg_0, options.arg_1]
+  });
+};
+
+
+/**
+ * Represents the parameters for the "requestsReceivedByFid" function.
+ */
+export type RequestsReceivedByFidParams = {
+  arg_0: AbiParameterToPrimitiveType<{"internalType":"uint256","name":"","type":"uint256"}>
+arg_1: AbiParameterToPrimitiveType<{"internalType":"uint256","name":"","type":"uint256"}>
+};
+
+/**
+ * Calls the "requestsReceivedByFid" function on the contract.
+ * @param options - The options for the requestsReceivedByFid function.
+ * @returns The parsed result of the function call.
+ * @example
+ * ```
+ * import { requestsReceivedByFid } from "TODO";
+ *
+ * const result = await requestsReceivedByFid({
+ *  arg_0: ...,
+ *  arg_1: ...,
+ * });
+ *
+ * ```
+ */
+export async function requestsReceivedByFid(
+  options: BaseTransactionOptions<RequestsReceivedByFidParams>
+) {
+  return readContract({
+    contract: options.contract,
+    method: [
+  "0x6a363d92",
+  [
+    {
+      "internalType": "uint256",
+      "name": "",
+      "type": "uint256"
+    },
+    {
+      "internalType": "uint256",
+      "name": "",
+      "type": "uint256"
+    }
+  ],
+  [
+    {
+      "internalType": "uint256",
+      "name": "id",
+      "type": "uint256"
+    },
     {
       "internalType": "address",
       "name": "requester",
