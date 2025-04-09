@@ -7,11 +7,12 @@ import {
 } from "@coinbase/onchainkit/minikit";
 import { Name, Identity, Badge } from "@coinbase/onchainkit/identity";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useAccount } from "wagmi";
+import { useAccount, useConnect } from "wagmi";
 import Check from "./svg/Check";
 import { UserSearch } from "./components/UserSearch";
 import { useUserStore } from "./store/userStore";
 import { VideoRequest } from "./components/VideoRequest";
+import connector from "@farcaster/frame-wagmi-connector";
 
 const SCHEMA_UID =
   "0x7889a09fb295b0a0c63a3d7903c4f00f7896cca4fa64d2c1313f8547390b7d39";
@@ -23,6 +24,7 @@ export default function App() {
   const addFrame = useAddFrame();
   const openUrl = useOpenUrl();
   const { address } = useAccount();
+  const { connect } = useConnect();
 
   useEffect(() => {
     if (!isFrameReady) {
@@ -82,7 +84,7 @@ export default function App() {
               </Identity>
             ) : (
               <div className="pl-2 pt-1 text-gray-500 text-sm font-semibold">
-                NOT CONNECTED
+                <button onClick={() => connect({ connector: connector() })}>CONNECT</button>
               </div>
             )}
           </div>
