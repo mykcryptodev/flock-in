@@ -38,6 +38,9 @@ export const RequestsCreatedByMe: FC = () => {
   return (
     <div className="flex flex-col gap-2">
       <div>Requests I Made</div>
+      {requests.length === 0 && (
+        <div className="text-gray-500 text-sm">No requests made</div>
+      )}
       {requests.map((request) => (
         <div key={request.id.toString()}>
           <Request key={request.id.toString()} request={request} onSuccess={() => setLastSuccess(new Date().getTime().toString())} />
