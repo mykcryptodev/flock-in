@@ -1,4 +1,4 @@
-import { getRequestsReceivedByFid } from "@/thirdweb/8453/0xbe0463eee6e6b0c290ab6b310317a68829254546";
+import { getRequestsReceivedByFid } from "@/thirdweb/8453/0x93f36b72db1dc47e3ad50e126d75b6d3a39c21d6";
 import { useMiniKit } from "@coinbase/onchainkit/minikit";
 import { FC, useEffect, useMemo, useState } from "react";
 import { CancelRequest } from "./CancelRequest";
@@ -37,6 +37,12 @@ export const Request: FC<Props> = ({ request, onSuccess }) => {
     const currentUserIsRequester = context?.user.fid === Number(request.requesterFid);
     const requestIsNotCompleted = !request.isCompleted;
     const requestIsNotCancelled = !request.isCancelled;
+    console.log({
+      request,
+      currentUserIsRequester,
+      requestIsNotCompleted,
+      requestIsNotCancelled,
+    })
     return currentUserIsRequester && requestIsNotCompleted && requestIsNotCancelled;
   }, [request.requesterFid, context?.user.fid, request.isCompleted, request.isCancelled]);
 

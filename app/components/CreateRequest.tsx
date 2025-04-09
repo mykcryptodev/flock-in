@@ -1,10 +1,9 @@
 import { Transaction, TransactionButton } from "@coinbase/onchainkit/transaction";
 import { FC, useCallback, useEffect, useState } from "react";
-import { REQUEST_AMOUNT, requestFlockIn } from "@/thirdweb/8453/0xbe0463eee6e6b0c290ab6b310317a68829254546";
+import { REQUEST_AMOUNT, requestFlockIn } from "@/thirdweb/8453/0x93f36b72db1dc47e3ad50e126d75b6d3a39c21d6";
 import { useUserStore } from "../store/userStore";
 import { createThirdwebClient, encode, getContract, toTokens } from "thirdweb";
-import { CONTRACT, TOKEN, TOKEN_DECIMALS } from "../constants";
-import { base } from "thirdweb/chains";
+import { CHAIN, CONTRACT, TOKEN, TOKEN_DECIMALS } from "../constants";
 import { allowance, approve, balanceOf } from "thirdweb/extensions/erc20";
 import { useAccount } from "wagmi";
 import { useMiniKit } from "@coinbase/onchainkit/minikit";
@@ -42,7 +41,7 @@ export const CreateRequest: FC<Props> = ({ onSuccess }) => {
         contract: getContract({
           address: CONTRACT,
           client,
-          chain: base,
+          chain: CHAIN,
         }),
       });
       const [allowanceAmount, balance] = await Promise.all([
@@ -50,7 +49,7 @@ export const CreateRequest: FC<Props> = ({ onSuccess }) => {
           contract: getContract({
             address: TOKEN,
             client,
-            chain: base,
+            chain: CHAIN,
           }),
           spender: CONTRACT,
           owner: address,
@@ -59,7 +58,7 @@ export const CreateRequest: FC<Props> = ({ onSuccess }) => {
           contract: getContract({
             address: TOKEN,
             client,
-            chain: base,
+            chain: CHAIN,
           }),
           address,
         }),
@@ -78,14 +77,14 @@ export const CreateRequest: FC<Props> = ({ onSuccess }) => {
       contract: getContract({
         address: CONTRACT,
         client,
-        chain: base,
+        chain: CHAIN,
       }),
     });
     const approvalTx = approve({
       contract: getContract({
         address: TOKEN,
         client,
-        chain: base,
+        chain: CHAIN,
       }),
       amount: requestAmount.toString(),
       spender: CONTRACT,
@@ -110,7 +109,7 @@ export const CreateRequest: FC<Props> = ({ onSuccess }) => {
       contract: getContract({
         address: CONTRACT,
         client,
-        chain: base,
+        chain: CHAIN,
       }),
       requesterFid: BigInt(requesterFid),
       completer: completerAddress,

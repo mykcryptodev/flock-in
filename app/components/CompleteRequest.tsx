@@ -1,10 +1,9 @@
-import { completeRequest } from "@/thirdweb/8453/0xbe0463eee6e6b0c290ab6b310317a68829254546";
+import { completeRequest } from "@/thirdweb/8453/0x93f36b72db1dc47e3ad50e126d75b6d3a39c21d6";
 import { Transaction } from "@coinbase/onchainkit/transaction";
 import { TransactionButton } from "@coinbase/onchainkit/transaction";
 import { FC } from "react";
 import { createThirdwebClient, encode, getContract } from "thirdweb";
-import { CONTRACT } from "../constants";
-import { base } from "thirdweb/chains";
+import { CHAIN, CONTRACT } from "../constants";
 
 const client = createThirdwebClient({
   clientId: process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID!,
@@ -20,7 +19,7 @@ export const CompleteRequest: FC<Props> = ({ requestId, onSuccess }) => {
       contract: getContract({
         address: CONTRACT,
         client,
-        chain: base,
+        chain: CHAIN,
       }),
       requestId: BigInt(requestId),
     });

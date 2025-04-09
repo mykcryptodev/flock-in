@@ -12,66 +12,47 @@ contract FlockIn is ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     /// @notice Structure to store request information
-    /// @dev Contains requester and completer details, amount, and claim status
     struct Request {
-        uint256 id; // the id of the request
-        address requester;  // Address of the request requester (Alice)
-        uint256 requesterFid; // Farcaster ID of the requester (Alice)
-        address completer;  // Address of the intended completer (Bob)
-        uint256 completerFid; // Farcaster ID of the intended completer (Bob)
-        uint256 amount;    // Amount of tokens requested
-        bool isCompleted;    // Whether the request has been completed
-        bool isCancelled;    // Whether the request has been cancelled
-        string message;    // Message from the requester to the completer
+        uint256 id;
+        address requester;
+        uint256 requesterFid;
+        address completer;
+        uint256 completerFid;
+        uint256 amount;
+        bool isCompleted;
+        bool isCancelled;
+        string message;
     }
 
-    mapping(address => Request[]) public requestsMadeByAddress;
-    mapping(address => Request[]) public requestsReceivedByAddress;
-    mapping(uint256 => Request[]) public requestsMadeByFid;
-    mapping(uint256 => Request[]) public requestsReceivedByFid;
+    // Main storage for requests
+    mapping(uint256 => Request) public requests;
+    
+    // Index mappings that store request IDs instead of full Request structs
+    mapping(address => uint256[]) private requestIdsByRequester;
+    mapping(address => uint256[]) private requestIdsByCompleter;
+    mapping(uint256 => uint256[]) private requestIdsByRequesterFid;
+    mapping(uint256 => uint256[]) private requestIdsByCompleterFid;
 
     /// @notice The ERC20 token used for requests
     IERC20 public immutable token;
 
     /// @notice The fixed amount required for each request
-    /// @dev Set to 4500 tokens (assuming 6 decimals)
     uint256 public constant REQUEST_AMOUNT = 10 * 10**6;
     
-    /// @notice Mapping of request IDs to Request structs
-    mapping(uint256 => Request) public requests;
-
     /// @notice Counter to generate unique request IDs
     uint256 public requestCounter;
 
-    /// @notice Emitted when a new request is created
-    /// @param requestId The ID of the created request
-    /// @param requester The address of the request requester
-    /// @param completer The address of the intended completer
-    /// @param amount The amount of tokens requested
+    // Events remain the same
     event RequestCreated(uint256 indexed requestId, address indexed requester, address indexed completer, uint256 amount, string message);
-
-    /// @notice Emitted when a request is completed and funds are claimed
-    /// @param requestId The ID of the completed request
-    /// @param completer The address of the request completer
     event RequestCompleted(uint256 indexed requestId, address indexed completer);
-
-    /// @notice Emitted when a request is cancelled and funds are returned
-    /// @param requestId The ID of the cancelled request
-    /// @param requester The address of the request requester
     event RequestCancelled(uint256 indexed requestId, address indexed requester);
 
-    /// @notice Initializes the contract with the token address
-    /// @param _token The address of the ERC20 token to be used
     constructor(address _token) {
         require(_token != address(0), "Invalid token address");
         token = IERC20(_token);
     }
 
     /// @notice Creates a new request by transferring tokens to the contract
-    /// @param requesterFid The Farcaster ID of the requester (Alice)
-    /// @param completer The address of the intended completer (Bob)
-    /// @param completerFid The Farcaster ID of the intended completer (Bob)
-    /// @dev Uses safeTransferFrom to safely handle token transfers
     function requestFlockIn(
         uint256 requesterFid,
         address completer,
@@ -82,7 +63,7 @@ contract FlockIn is ReentrancyGuard {
         token.safeTransferFrom(msg.sender, address(this), REQUEST_AMOUNT);
         
         uint256 requestId = requestCounter++;
-        requests[requestId] = Request({
+        Request memory newRequest = Request({
             id: requestId,
             requester: msg.sender,
             requesterFid: requesterFid,
@@ -94,17 +75,18 @@ contract FlockIn is ReentrancyGuard {
             message: message
         });
         
-        requestsMadeByAddress[msg.sender].push(requests[requestId]);
-        requestsReceivedByAddress[completer].push(requests[requestId]);
-        requestsMadeByFid[requesterFid].push(requests[requestId]);
-        requestsReceivedByFid[completerFid].push(requests[requestId]);
+        requests[requestId] = newRequest;
+        
+        // Store only the request ID in the index mappings
+        requestIdsByRequester[msg.sender].push(requestId);
+        requestIdsByCompleter[completer].push(requestId);
+        requestIdsByRequesterFid[requesterFid].push(requestId);
+        requestIdsByCompleterFid[completerFid].push(requestId);
 
         emit RequestCreated(requestId, msg.sender, completer, REQUEST_AMOUNT, message);
     }
 
     /// @notice Completes a request and transfers the funds to the completer
-    /// @param requestId The ID of the request to complete
-    /// @dev Only the intended completer can complete the request, and it must not be already completed or cancelled
     function completeRequest(uint256 requestId) external nonReentrant {
         Request storage request = requests[requestId];
         require(request.completer == msg.sender, "Not the intended completer");
@@ -118,8 +100,6 @@ contract FlockIn is ReentrancyGuard {
     }
 
     /// @notice Cancels a request and returns the funds to the requester
-    /// @param requestId The ID of the request to cancel
-    /// @dev Only the requester can cancel their request, and it must not be already completed or cancelled
     function cancelRequest(uint256 requestId) external nonReentrant {
         Request storage request = requests[requestId];
         require(request.requester == msg.sender, "Not the requester");
@@ -133,34 +113,46 @@ contract FlockIn is ReentrancyGuard {
     }
 
     /// @notice Gets all requests made by a specific address
-    /// @param requester The address to get requests for
-    /// @return An array of Request structs representing all requests made by the requester
-    /// @dev Returns requests from the requestsMadeByAddress mapping for the given address
     function getRequestsMadeByAddress(address requester) external view returns (Request[] memory) {
-        return requestsMadeByAddress[requester];
+        uint256[] storage requestIds = requestIdsByRequester[requester];
+        Request[] memory result = new Request[](requestIds.length);
+        
+        for (uint256 i = 0; i < requestIds.length; i++) {
+            result[i] = requests[requestIds[i]];
+        }
+        return result;
     }
 
     /// @notice Gets all requests received by a specific address
-    /// @param completer The address to get requests for
-    /// @return An array of Request structs representing all requests where completer is the intended recipient
-    /// @dev Returns requests from the requestsReceivedByAddress mapping for the given address
     function getRequestsReceivedByAddress(address completer) external view returns (Request[] memory) {
-        return requestsReceivedByAddress[completer];
+        uint256[] storage requestIds = requestIdsByCompleter[completer];
+        Request[] memory result = new Request[](requestIds.length);
+        
+        for (uint256 i = 0; i < requestIds.length; i++) {
+            result[i] = requests[requestIds[i]];
+        }
+        return result;
     }
 
     /// @notice Gets all requests made by a specific Farcaster ID
-    /// @param requesterFid The Farcaster ID to get requests for
-    /// @return An array of Request structs representing all requests made by the given Farcaster ID
-    /// @dev Returns requests from the requestsMadeByFid mapping for the given FID
     function getRequestsMadeByFid(uint256 requesterFid) external view returns (Request[] memory) {
-        return requestsMadeByFid[requesterFid];
+        uint256[] storage requestIds = requestIdsByRequesterFid[requesterFid];
+        Request[] memory result = new Request[](requestIds.length);
+        
+        for (uint256 i = 0; i < requestIds.length; i++) {
+            result[i] = requests[requestIds[i]];
+        }
+        return result;
     }
 
     /// @notice Gets all requests received by a specific Farcaster ID
-    /// @param completerFid The Farcaster ID to get requests for
-    /// @return An array of Request structs representing all requests where the given Farcaster ID is the intended recipient
-    /// @dev Returns requests from the requestsReceivedByFid mapping for the given FID
     function getRequestsReceivedByFid(uint256 completerFid) external view returns (Request[] memory) {
-        return requestsReceivedByFid[completerFid];
+        uint256[] storage requestIds = requestIdsByCompleterFid[completerFid];
+        Request[] memory result = new Request[](requestIds.length);
+        
+        for (uint256 i = 0; i < requestIds.length; i++) {
+            result[i] = requests[requestIds[i]];
+        }
+        return result;
     }
-}
+} 

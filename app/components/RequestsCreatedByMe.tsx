@@ -1,10 +1,9 @@
-import { getRequestsMadeByFid } from "@/thirdweb/8453/0xbe0463eee6e6b0c290ab6b310317a68829254546";
+import { getRequestsMadeByFid } from "@/thirdweb/8453/0x93f36b72db1dc47e3ad50e126d75b6d3a39c21d6";
 import { useMiniKit } from "@coinbase/onchainkit/minikit";
 import { FC, useEffect, useState } from "react";
 import { getContract } from "thirdweb";
 import { createThirdwebClient } from "thirdweb";
-import { CONTRACT } from "../constants";
-import { base } from "thirdweb/chains";
+import { CHAIN, CONTRACT } from "../constants";
 import { Request } from "./Request";
 
 const client = createThirdwebClient({
@@ -25,7 +24,7 @@ export const RequestsCreatedByMe: FC = () => {
         contract: getContract({
           address: CONTRACT,
           client,
-          chain: base,
+          chain: CHAIN,
         }),
         requesterFid: BigInt(context.user.fid),
       });
