@@ -145,7 +145,11 @@ export const Request: FC<Props> = ({ request, onSuccess }) => {
         
         <div className="flex space-x-2">
           {requestCanBeCompletedByCurrentUser && (
-            <CompleteRequest requestId={request.id.toString()} onSuccess={onSuccess} />
+            <CompleteRequest 
+              requestId={request.id.toString()} 
+              requesterFid={Number(request.requesterFid)}
+              onSuccess={onSuccess} 
+            />
           )}
           {requestCanBeCancelledByCurrentUser && (
             <CancelRequest requestId={request.id.toString()} onSuccess={onSuccess} />

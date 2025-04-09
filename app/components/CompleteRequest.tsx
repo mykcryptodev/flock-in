@@ -1,9 +1,10 @@
 import { completeRequest } from "@/thirdweb/8453/0x93f36b72db1dc47e3ad50e126d75b6d3a39c21d6";
 import { Transaction } from "@coinbase/onchainkit/transaction";
 import { TransactionButton } from "@coinbase/onchainkit/transaction";
-import { FC } from "react";
+import { FC, useCallback } from "react";
 import { createThirdwebClient, encode, getContract } from "thirdweb";
 import { CHAIN, CONTRACT } from "../constants";
+import { useMiniKit } from "@coinbase/onchainkit/minikit";
 
 const client = createThirdwebClient({
   clientId: process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID!,
@@ -11,9 +12,38 @@ const client = createThirdwebClient({
 
 type Props = {
   requestId: string;
+  requesterFid: number;
   onSuccess: () => void;
 }
-export const CompleteRequest: FC<Props> = ({ requestId, onSuccess }) => {
+
+export const CompleteRequest: FC<Props> = ({ requestId, requesterFid, onSuccess }) => {
+  const { context } = useMiniKit();
+
+  const sendCompletionNotification = useCallback(async () => {
+    if (!context?.user.username) {
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/notifications/completion', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          requesterFid,
+          completerUsername: context.user.username,
+        }),
+      });
+
+      if (!response.ok) {
+        console.error('Failed to send completion notification');
+      }
+    } catch (error) {
+      console.error('Error sending completion notification:', error);
+    }
+  }, [context, requesterFid]);
+
   const getCalls = async () => {
     const tx = completeRequest({
       contract: getContract({
@@ -31,10 +61,15 @@ export const CompleteRequest: FC<Props> = ({ requestId, onSuccess }) => {
       },
     ];
   }
+
   return (
     <Transaction
       calls={getCalls}
-      onSuccess={onSuccess}
+      onSuccess={() => {
+        // Send notification after successful completion
+        sendCompletionNotification();
+        onSuccess();
+      }}
     >
       <TransactionButton className="bg-green-500 text-white p-2 rounded-md" text="Complete" />
     </Transaction>
