@@ -11,7 +11,7 @@ import { useAccount, useConnect } from "wagmi";
 import Check from "./svg/Check";
 import { UserSearch } from "./components/UserSearch";
 import { useUserStore } from "./store/userStore";
-import { VideoRequest } from "./components/VideoRequest";
+import { CreateRequest } from "./components/CreateRequest";
 import connector from "@farcaster/frame-wagmi-connector";
 import { RequestsCreatedByMe } from "./components/RequestsCreatedByMe";
 import { RequestsCreatedForMe } from "./components/RequestsCreatedForMe";
@@ -22,6 +22,7 @@ const SCHEMA_UID =
 export default function App() {
   const { setFrameReady, isFrameReady, context } = useMiniKit();
   const [frameAdded, setFrameAdded] = useState(false);
+  const [lastSuccess, setLastSuccess] = useState<string | null>(null);
 
   const addFrame = useAddFrame();
   const openUrl = useOpenUrl();
@@ -73,10 +74,10 @@ export default function App() {
   }, [context, handleAddFrame, frameAdded]);
 
   return (
-    <div className="flex flex-col min-h-screen sm:min-h-[820px] font-sans bg-[#E5E5E5] text-black items-center snake-dark relative">
-      <div className="w-screen max-w-[520px]">
-        <header className="mr-2 mt-4 flex justify-between items-center">
-          <div className="justify-start pl-1">
+    <div className="flex flex-col h-screen overflow-hidden bg-[#E5E5E5] text-black snake-dark">
+      <div className="w-full max-w-[520px] mx-auto flex flex-col h-full">
+        <header className="flex justify-between items-center p-4">
+          <div className="justify-start">
             {address ? (
               <Identity
                 address={address}
@@ -91,25 +92,27 @@ export default function App() {
                 </Name>
               </Identity>
             ) : (
-              <div className="pl-2 pt-1 text-gray-500 text-sm font-semibold">
+              <div className="text-gray-500 text-sm font-semibold">
                 Connecting...
               </div>
             )}
           </div>
-          <div className="pr-1 justify-end">{saveFrameButton}</div>
+          <div className="justify-end">{saveFrameButton}</div>
         </header>
 
-        <main className="font-serif px-2 flex flex-col gap-2 mt-4">
-          <UserSearch />
-          {selectedUser && <VideoRequest />}
-          <RequestsCreatedByMe />
-          <RequestsCreatedForMe />
+        <main className="flex-1 overflow-y-auto px-4 pb-20">
+          <div className="flex flex-col gap-4">
+            <UserSearch />          
+            <CreateRequest onSuccess={() => setLastSuccess(new Date().getTime().toString())} />
+            <RequestsCreatedByMe key={lastSuccess} />
+            <RequestsCreatedForMe key={lastSuccess} />
+          </div>
         </main>
 
-        <footer className="absolute bottom-4 flex items-center w-screen max-w-[520px] justify-center">
+        <footer className="fixed bottom-0 left-0 right-0 flex items-center justify-center p-4 bg-[#E5E5E5]">
           <button
             type="button"
-            className="mt-4 ml-4 px-2 py-1 flex justify-start rounded-2xl font-semibold opacity-40 border border-black text-xs"
+            className="px-2 py-1 flex justify-start rounded-2xl font-semibold opacity-40 border border-black text-xs"
             onClick={() => openUrl("https://base.org/builders/minikit")}
           >
             BUILT ON BASE WITH MINIKIT

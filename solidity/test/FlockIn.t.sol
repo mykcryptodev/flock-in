@@ -40,24 +40,31 @@ contract FlockInTest is Test {
         vm.startPrank(alice);
         token.approve(address(flockIn), type(uint256).max);
         
-        flockIn.requestFlockIn(aliceFid, bob, bobFid);
+        string memory message = "Hey Bob, can you help me with this?";
+        flockIn.requestFlockIn(aliceFid, bob, bobFid, message);
         
         // Check request was created correctly
         (
+            uint256 id,
             address requester,
             uint256 requesterFid,
             address completer,
             uint256 completerFid,
             uint256 amount,
-            bool isClaimed
+            bool isCompleted,
+            bool isCancelled,
+            string memory storedMessage
         ) = flockIn.requests(0);
         
+        assertEq(id, 0);
         assertEq(requester, alice);
         assertEq(requesterFid, aliceFid);
         assertEq(completer, bob);
         assertEq(completerFid, bobFid);
         assertEq(amount, flockIn.REQUEST_AMOUNT());
-        assertEq(isClaimed, false);
+        assertEq(isCompleted, false);
+        assertEq(isCancelled, false);
+        assertEq(storedMessage, message);
         
         // Check token transfer
         assertEq(token.balanceOf(address(flockIn)), flockIn.REQUEST_AMOUNT());
@@ -69,7 +76,7 @@ contract FlockInTest is Test {
         // Create request
         vm.startPrank(alice);
         token.approve(address(flockIn), type(uint256).max);
-        flockIn.requestFlockIn(aliceFid, bob, bobFid);
+        flockIn.requestFlockIn(aliceFid, bob, bobFid, "Test message");
         vm.stopPrank();
         
         // Complete request as Bob
@@ -88,7 +95,7 @@ contract FlockInTest is Test {
         // Create request
         vm.startPrank(alice);
         token.approve(address(flockIn), type(uint256).max);
-        flockIn.requestFlockIn(aliceFid, bob, bobFid);
+        flockIn.requestFlockIn(aliceFid, bob, bobFid, "Test message");
         
         // Cancel request
         uint256 aliceBalanceBefore = token.balanceOf(alice);
@@ -101,11 +108,35 @@ contract FlockInTest is Test {
         vm.stopPrank();
     }
 
+    function test_GetRequestsByFarcasterId() public {
+        // Create requests
+        vm.startPrank(alice);
+        token.approve(address(flockIn), type(uint256).max);
+        flockIn.requestFlockIn(aliceFid, bob, bobFid, "First message");
+        flockIn.requestFlockIn(aliceFid, charlie, charlieFid, "Second message");
+        vm.stopPrank();
+
+        // Test getRequestsMadeByFid
+        FlockIn.Request[] memory requestsMadeByAlice = flockIn.getRequestsMadeByFid(aliceFid);
+        assertEq(requestsMadeByAlice.length, 2);
+        assertEq(requestsMadeByAlice[0].requesterFid, aliceFid);
+        assertEq(requestsMadeByAlice[1].requesterFid, aliceFid);
+
+        // Test getRequestsReceivedByFid
+        FlockIn.Request[] memory requestsReceivedByBob = flockIn.getRequestsReceivedByFid(bobFid);
+        assertEq(requestsReceivedByBob.length, 1);
+        assertEq(requestsReceivedByBob[0].completerFid, bobFid);
+
+        FlockIn.Request[] memory requestsReceivedByCharlie = flockIn.getRequestsReceivedByFid(charlieFid);
+        assertEq(requestsReceivedByCharlie.length, 1);
+        assertEq(requestsReceivedByCharlie[0].completerFid, charlieFid);
+    }
+
     function test_RevertWhen_CompleteRequestAsNonCompleter() public {
         // Create request
         vm.startPrank(alice);
         token.approve(address(flockIn), type(uint256).max);
-        flockIn.requestFlockIn(aliceFid, bob, bobFid);
+        flockIn.requestFlockIn(aliceFid, bob, bobFid, "Test message");
         vm.stopPrank();
         
         // Try to complete as Charlie
@@ -118,7 +149,7 @@ contract FlockInTest is Test {
         // Create request
         vm.startPrank(alice);
         token.approve(address(flockIn), type(uint256).max);
-        flockIn.requestFlockIn(aliceFid, bob, bobFid);
+        flockIn.requestFlockIn(aliceFid, bob, bobFid, "Test message");
         vm.stopPrank();
         
         // Try to cancel as Bob
@@ -131,7 +162,7 @@ contract FlockInTest is Test {
         // Create request
         vm.startPrank(alice);
         token.approve(address(flockIn), type(uint256).max);
-        flockIn.requestFlockIn(aliceFid, bob, bobFid);
+        flockIn.requestFlockIn(aliceFid, bob, bobFid, "Test message");
         
         // Cancel request
         flockIn.cancelRequest(0);
@@ -139,7 +170,7 @@ contract FlockInTest is Test {
         
         // Try to complete as Bob
         vm.startPrank(bob);
-        vm.expectRevert("Already claimed");
+        vm.expectRevert("Request already cancelled");
         flockIn.completeRequest(0);
     }
 
@@ -147,7 +178,7 @@ contract FlockInTest is Test {
         // Create request
         vm.startPrank(alice);
         token.approve(address(flockIn), type(uint256).max);
-        flockIn.requestFlockIn(aliceFid, bob, bobFid);
+        flockIn.requestFlockIn(aliceFid, bob, bobFid, "Test message");
         vm.stopPrank();
         
         // Complete request as Bob
@@ -157,7 +188,7 @@ contract FlockInTest is Test {
         
         // Try to cancel as Alice
         vm.startPrank(alice);
-        vm.expectRevert("Request already claimed");
+        vm.expectRevert("Request already completed");
         flockIn.cancelRequest(0);
     }
 
@@ -165,7 +196,7 @@ contract FlockInTest is Test {
         // Create request
         vm.startPrank(alice);
         token.approve(address(flockIn), type(uint256).max);
-        flockIn.requestFlockIn(aliceFid, bob, bobFid);
+        flockIn.requestFlockIn(aliceFid, bob, bobFid, "Test message");
         vm.stopPrank();
         
         // Complete request as Bob
@@ -173,7 +204,7 @@ contract FlockInTest is Test {
         flockIn.completeRequest(0);
         
         // Try to complete again
-        vm.expectRevert("Already claimed");
+        vm.expectRevert("Already completed");
         flockIn.completeRequest(0);
     }
 
@@ -181,13 +212,13 @@ contract FlockInTest is Test {
         // Create request
         vm.startPrank(alice);
         token.approve(address(flockIn), type(uint256).max);
-        flockIn.requestFlockIn(aliceFid, bob, bobFid);
+        flockIn.requestFlockIn(aliceFid, bob, bobFid, "Test message");
         
         // Cancel request
         flockIn.cancelRequest(0);
         
         // Try to cancel again
-        vm.expectRevert("Request already claimed");
+        vm.expectRevert("Request already cancelled");
         flockIn.cancelRequest(0);
     }
 } 

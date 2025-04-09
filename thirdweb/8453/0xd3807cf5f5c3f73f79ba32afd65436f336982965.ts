@@ -229,7 +229,12 @@ export async function getRequestsMadeByAddress(
         },
         {
           "internalType": "bool",
-          "name": "isClaimed",
+          "name": "isCompleted",
+          "type": "bool"
+        },
+        {
+          "internalType": "bool",
+          "name": "isCancelled",
           "type": "bool"
         },
         {
@@ -319,7 +324,12 @@ export async function getRequestsMadeByFid(
         },
         {
           "internalType": "bool",
-          "name": "isClaimed",
+          "name": "isCompleted",
+          "type": "bool"
+        },
+        {
+          "internalType": "bool",
+          "name": "isCancelled",
           "type": "bool"
         },
         {
@@ -409,7 +419,12 @@ export async function getRequestsReceivedByAddress(
         },
         {
           "internalType": "bool",
-          "name": "isClaimed",
+          "name": "isCompleted",
+          "type": "bool"
+        },
+        {
+          "internalType": "bool",
+          "name": "isCancelled",
           "type": "bool"
         },
         {
@@ -499,7 +514,12 @@ export async function getRequestsReceivedByFid(
         },
         {
           "internalType": "bool",
-          "name": "isClaimed",
+          "name": "isCompleted",
+          "type": "bool"
+        },
+        {
+          "internalType": "bool",
+          "name": "isCancelled",
           "type": "bool"
         },
         {
@@ -622,7 +642,12 @@ export async function requests(
     },
     {
       "internalType": "bool",
-      "name": "isClaimed",
+      "name": "isCompleted",
+      "type": "bool"
+    },
+    {
+      "internalType": "bool",
+      "name": "isCancelled",
       "type": "bool"
     },
     {
@@ -712,7 +737,12 @@ export async function requestsMadeByAddress(
     },
     {
       "internalType": "bool",
-      "name": "isClaimed",
+      "name": "isCompleted",
+      "type": "bool"
+    },
+    {
+      "internalType": "bool",
+      "name": "isCancelled",
       "type": "bool"
     },
     {
@@ -802,7 +832,12 @@ export async function requestsMadeByFid(
     },
     {
       "internalType": "bool",
-      "name": "isClaimed",
+      "name": "isCompleted",
+      "type": "bool"
+    },
+    {
+      "internalType": "bool",
+      "name": "isCancelled",
       "type": "bool"
     },
     {
@@ -892,7 +927,12 @@ export async function requestsReceivedByAddress(
     },
     {
       "internalType": "bool",
-      "name": "isClaimed",
+      "name": "isCompleted",
+      "type": "bool"
+    },
+    {
+      "internalType": "bool",
+      "name": "isCancelled",
       "type": "bool"
     },
     {
@@ -982,7 +1022,12 @@ export async function requestsReceivedByFid(
     },
     {
       "internalType": "bool",
-      "name": "isClaimed",
+      "name": "isCompleted",
+      "type": "bool"
+    },
+    {
+      "internalType": "bool",
+      "name": "isCancelled",
       "type": "bool"
     },
     {

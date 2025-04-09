@@ -1,4 +1,4 @@
-import { completeRequest } from "@/thirdweb/8453/0x2f530532213d5c1a8c80d7d69438751116ff6af1";
+import { completeRequest } from "@/thirdweb/8453/0xd3807cf5f5c3f73f79ba32afd65436f336982965";
 import { Transaction } from "@coinbase/onchainkit/transaction";
 import { TransactionButton } from "@coinbase/onchainkit/transaction";
 import { FC } from "react";
@@ -12,8 +12,9 @@ const client = createThirdwebClient({
 
 type Props = {
   requestId: string;
+  onSuccess: () => void;
 }
-export const CompleteRequest: FC<Props> = ({ requestId }) => {
+export const CompleteRequest: FC<Props> = ({ requestId, onSuccess }) => {
   const getCalls = async () => {
     const tx = completeRequest({
       contract: getContract({
@@ -34,6 +35,7 @@ export const CompleteRequest: FC<Props> = ({ requestId }) => {
   return (
     <Transaction
       calls={getCalls}
+      onSuccess={onSuccess}
     >
       <TransactionButton className="bg-green-500 text-white p-2 rounded-md" text="Complete" />
     </Transaction>

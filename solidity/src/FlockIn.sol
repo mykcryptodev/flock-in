@@ -20,7 +20,8 @@ contract FlockIn is ReentrancyGuard {
         address completer;  // Address of the intended completer (Bob)
         uint256 completerFid; // Farcaster ID of the intended completer (Bob)
         uint256 amount;    // Amount of tokens requested
-        bool isClaimed;    // Whether the request has been claimed or cancelled
+        bool isCompleted;    // Whether the request has been completed
+        bool isCancelled;    // Whether the request has been cancelled
         string message;    // Message from the requester to the completer
     }
 
@@ -88,7 +89,8 @@ contract FlockIn is ReentrancyGuard {
             completer: completer,
             completerFid: completerFid,
             amount: REQUEST_AMOUNT,
-            isClaimed: false,
+            isCompleted: false,
+            isCancelled: false,
             message: message
         });
         
@@ -102,13 +104,14 @@ contract FlockIn is ReentrancyGuard {
 
     /// @notice Completes a request and transfers the funds to the completer
     /// @param requestId The ID of the request to complete
-    /// @dev Only the intended completer can complete the request, and it must not be already claimed
+    /// @dev Only the intended completer can complete the request, and it must not be already completed or cancelled
     function completeRequest(uint256 requestId) external nonReentrant {
         Request storage request = requests[requestId];
         require(request.completer == msg.sender, "Not the intended completer");
-        require(!request.isClaimed, "Already claimed");
-        
-        request.isClaimed = true;
+        require(!request.isCompleted, "Already completed");
+        require(!request.isCancelled, "Request already cancelled");
+
+        request.isCompleted = true;
         token.safeTransfer(msg.sender, request.amount);
         
         emit RequestCompleted(requestId, msg.sender);
@@ -116,13 +119,14 @@ contract FlockIn is ReentrancyGuard {
 
     /// @notice Cancels a request and returns the funds to the requester
     /// @param requestId The ID of the request to cancel
-    /// @dev Only the requester can cancel their request, and it must not be already claimed
+    /// @dev Only the requester can cancel their request, and it must not be already completed or cancelled
     function cancelRequest(uint256 requestId) external nonReentrant {
         Request storage request = requests[requestId];
         require(request.requester == msg.sender, "Not the requester");
-        require(!request.isClaimed, "Request already claimed");
+        require(!request.isCompleted, "Request already completed");
+        require(!request.isCancelled, "Request already cancelled");
         
-        request.isClaimed = true;
+        request.isCancelled = true;
         token.safeTransfer(msg.sender, request.amount);
         
         emit RequestCancelled(requestId, msg.sender);

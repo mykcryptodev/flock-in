@@ -74,6 +74,7 @@ export const UserSearch: FC = () => {
         </div>
       ) : (
         <>
+          <h1>Find a User</h1>
           <input 
             type="text" 
             placeholder="Search for a user" 

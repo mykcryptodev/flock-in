@@ -1,6 +1,6 @@
 import { Transaction, TransactionButton } from "@coinbase/onchainkit/transaction";
 import { FC, useCallback, useEffect, useState } from "react";
-import { REQUEST_AMOUNT, requestFlockIn } from "@/thirdweb/8453/0x2f530532213d5c1a8c80d7d69438751116ff6af1";
+import { REQUEST_AMOUNT, requestFlockIn } from "@/thirdweb/8453/0xd3807cf5f5c3f73f79ba32afd65436f336982965";
 import { useUserStore } from "../store/userStore";
 import { createThirdwebClient, encode, getContract } from "thirdweb";
 import { CONTRACT, TOKEN } from "../constants";
@@ -15,15 +15,16 @@ const client = createThirdwebClient({
   clientId: process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID!,
 });
 
-export const VideoRequest: FC = () => {
+type Props = {
+  onSuccess: () => void;
+}
+
+export const CreateRequest: FC<Props> = ({ onSuccess }) => {
   const { address } = useAccount();
   const { selectedUser } = useUserStore();
   const { context } = useMiniKit();
   const [videoDescription, setVideoDescription] = useState('');
   const [approvalRequired, setApprovalRequired] = useState(false);
-  const [allowanceAmount, setAllowanceAmount] = useState<bigint>(BigInt(0));
-  const [requestAmount, setRequestAmount] = useState<bigint>(BigInt(0));
-  const [balance, setBalance] = useState<bigint>(BigInt(0));
   const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const text = e.target.value;
     if (text.length <= MAX_CHARS) {
@@ -43,7 +44,6 @@ export const VideoRequest: FC = () => {
           chain: base,
         }),
       });
-      setRequestAmount(requestAmount);
       const [allowanceAmount, balance] = await Promise.all([
         allowance({
           contract: getContract({
@@ -64,8 +64,6 @@ export const VideoRequest: FC = () => {
         }),
       ]);
       setApprovalRequired(allowanceAmount < requestAmount);
-      setAllowanceAmount(allowanceAmount);
-      setBalance(balance);
     };
     checkApproval();
   }, [address, approvalRequired]);
@@ -128,27 +126,15 @@ export const VideoRequest: FC = () => {
 
   return (
     <div>
-      <h1>Video Request</h1>
+      <h1>Describe Your Video Request</h1>
       <textarea
         value={videoDescription}
         onChange={handleDescriptionChange}
-        placeholder="Describe what you want to see (max 1000 characters)"
+        placeholder={`Describe what you want to see (max ${MAX_CHARS} characters)`}
         className="w-full p-2 border-2 border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
       />
-      <div className="text-sm text-gray-500 mt-1">
+      <div className="text-sm text-gray-500 mb-2 text-right">
         {videoDescription.length}/{MAX_CHARS} characters
-      </div>
-
-      <div className="flex flex-col gap-2 text-sm text-gray-500 mt-1">
-        <div>
-          {allowanceAmount.toString()}
-        </div>
-        <div>
-          {requestAmount.toString()}
-        </div>
-        <div>
-          {balance.toString()}
-        </div>
       </div>
       {approvalRequired && (
         <Transaction
@@ -164,10 +150,12 @@ export const VideoRequest: FC = () => {
       {!approvalRequired && (
         <Transaction
           calls={getTxCalls}
+          onSuccess={onSuccess}
         >
           <TransactionButton
             className="bg-blue-500 text-white p-2 rounded-md"
             text="Request Video"
+            disabled={!selectedUser}
           />
         </Transaction>
       )}
