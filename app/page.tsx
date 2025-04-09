@@ -46,8 +46,6 @@ export default function App() {
     setFrameAdded(Boolean(frameAdded));
   }, [addFrame, setFrameAdded]);
 
-  const { selectedUser } = useUserStore();
-
   const saveFrameButton = useMemo(() => {
     if (context && !context.client.added) {
       return (

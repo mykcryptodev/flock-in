@@ -1,5 +1,3 @@
-import { getRequestsReceivedByFid } from "@/thirdweb/8453/0xd3807cf5f5c3f73f79ba32afd65436f336982965";
-
 // Function to send a notification to a user when a request is created for them
 export async function sendRequestNotification(completerFid: number, requesterUsername: string, message: string) {
   try {
@@ -13,8 +11,8 @@ export async function sendRequestNotification(completerFid: number, requesterUse
     // Prepare the notification payload
     const notification = {
       title: "New Request",
-      body: `${requesterUsername} requested you: ${message.substring(0, 50)}${message.length > 50 ? '...' : ''}`,
-      target_url: "https://flock-in.vercel.app/requests", // URL to the requests page
+      body: `${requesterUsername} requested a video: ${message.substring(0, 50)}${message.length > 50 ? '...' : ''}`,
+      target_url: "https://flock-in.vercel.app", // URL to the requests page
     };
 
     // Send the notification to the completer
