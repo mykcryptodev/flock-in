@@ -9,7 +9,11 @@ const client = createThirdwebClient({
   clientId: process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID!,
 });
 
-export const RequestsCreatedForMe: FC = () => {
+type Props = {
+  refreshTrigger?: string | null;
+}
+
+export const RequestsCreatedForMe: FC<Props> = ({ refreshTrigger }) => {
   const { context } = useMiniKit();
   const [requests, setRequests] = useState<Awaited<ReturnType<typeof getRequestsReceivedByFid>>>([]);
   const [lastSuccess, setLastSuccess] = useState<string | null>(null);
@@ -30,7 +34,7 @@ export const RequestsCreatedForMe: FC = () => {
       setRequests(reversedRequests);
     };
     fetchRequests();
-  }, [context, lastSuccess]);
+  }, [context, lastSuccess, refreshTrigger]);
 
   return (
     <div className="flex flex-col gap-2">

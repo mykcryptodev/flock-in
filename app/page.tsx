@@ -101,8 +101,8 @@ export default function App() {
           <div className="flex flex-col gap-4">
             <UserSearch />          
             <CreateRequest onSuccess={() => setLastSuccess(new Date().getTime().toString())} />
-            <RequestsCreatedByMe key={lastSuccess} />
-            <RequestsCreatedForMe key={lastSuccess} />
+            <RequestsCreatedByMe refreshTrigger={lastSuccess} />
+            <RequestsCreatedForMe refreshTrigger={lastSuccess} />
           </div>
         </main>
 
