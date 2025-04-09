@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-const NEYNAR_API_KEY = process.env.NEYNAR_API_KEY;
-const NEYNAR_API_URL = 'https://api.neynar.com/v2/farcaster/notifications';
+import { sendFrameNotification } from "@/app/lib/notification-client";
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,40 +15,34 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get the API key from environment variables
-    if (!NEYNAR_API_KEY) {
+    // Send the notification using MiniKit's notification system
+    const result = await sendFrameNotification({
+      fid: Number(requesterFid),
+      title: "Request Completed",
+      body: `${completerUsername} has completed your video request!`,
+    });
+
+    if (result.state === "error") {
+      console.error('Failed to send completion notification:', result.error);
       return NextResponse.json(
-        { error: 'Neynar API key is not configured' },
+        { error: 'Failed to send notification' },
         { status: 500 }
       );
     }
 
-    // Prepare the notification payload
-    const notification = {
-      title: "Request Completed",
-      body: `${completerUsername} has completed your video request!`,
-      target_url: "https://flock-in.vercel.app", // URL to the requests page
-    };
-
-    // Send the notification to the requester
-    const response = await fetch(NEYNAR_API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'api_key': NEYNAR_API_KEY,
-      },
-      body: JSON.stringify({
-        target_fid: requesterFid,
-        notification,
-      }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error('Failed to send completion notification:', errorData);
+    if (result.state === "no_token") {
+      console.log('User has not enabled notifications');
       return NextResponse.json(
-        { error: 'Failed to send notification' },
-        { status: response.status }
+        { message: 'User has not enabled notifications' },
+        { status: 200 }
+      );
+    }
+
+    if (result.state === "rate_limit") {
+      console.log('Notification rate limited');
+      return NextResponse.json(
+        { message: 'Notification rate limited' },
+        { status: 200 }
       );
     }
 
