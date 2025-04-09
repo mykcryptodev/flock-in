@@ -1,11 +1,13 @@
 import { Transaction, TransactionButton } from "@coinbase/onchainkit/transaction";
-import { FC, useCallback, useMemo, useState } from "react";
-import { REQUEST_AMOUNT, requestFlockIn } from "@/thirdweb/8453/0x6a89bdbe3599ffde6c7e98549d736171c7f8c82f";
+import { FC, useCallback, useEffect, useState } from "react";
+import { REQUEST_AMOUNT, requestFlockIn } from "@/thirdweb/8453/0x6697c2fcd1f155da0cb3c0c887ecff24a664a1fe";
 import { useUserStore } from "../store/userStore";
 import { createThirdwebClient, encode, getContract } from "thirdweb";
 import { CONTRACT, TOKEN } from "../constants";
 import { base } from "thirdweb/chains";
-import { approve } from "thirdweb/extensions/erc20";
+import { allowance, approve, balanceOf } from "thirdweb/extensions/erc20";
+import { useAccount } from "wagmi";
+import { useMiniKit } from "@coinbase/onchainkit/minikit";
 
 const MAX_CHARS = 300;
 
@@ -14,9 +16,14 @@ const client = createThirdwebClient({
 });
 
 export const VideoRequest: FC = () => {
+  const { address } = useAccount();
   const { selectedUser } = useUserStore();
+  const { context } = useMiniKit();
   const [videoDescription, setVideoDescription] = useState('');
-
+  const [approvalRequired, setApprovalRequired] = useState(false);
+  const [allowanceAmount, setAllowanceAmount] = useState<bigint>(BigInt(0));
+  const [requestAmount, setRequestAmount] = useState<bigint>(BigInt(0));
+  const [balance, setBalance] = useState<bigint>(BigInt(0));
   const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const text = e.target.value;
     if (text.length <= MAX_CHARS) {
@@ -24,47 +31,100 @@ export const VideoRequest: FC = () => {
     }
   };
 
-  const requestAmount = useMemo(() => {
-    return REQUEST_AMOUNT.toString();
-  }, []);
+  useEffect(() => {
+    const checkApproval = async () => {
+      if (!address || approvalRequired) {
+        return false;
+      }
+      const requestAmount = await REQUEST_AMOUNT({
+        contract: getContract({
+          address: CONTRACT,
+          client,
+          chain: base,
+        }),
+      });
+      setRequestAmount(requestAmount);
+      const [allowanceAmount, balance] = await Promise.all([
+        allowance({
+          contract: getContract({
+            address: TOKEN,
+            client,
+            chain: base,
+          }),
+          spender: CONTRACT,
+          owner: address,
+        }),
+        balanceOf({
+          contract: getContract({
+            address: TOKEN,
+            client,
+            chain: base,
+          }),
+          address,
+        }),
+      ]);
+      setApprovalRequired(allowanceAmount < requestAmount);
+      setAllowanceAmount(allowanceAmount);
+      setBalance(balance);
+    };
+    checkApproval();
+  }, [address, approvalRequired]);
 
-  const getCalls = useCallback(async () => {
-    const completerAddress = selectedUser?.verified_addresses?.primary?.eth_address ?? selectedUser?.custody_address;
-    if (!completerAddress) {
+  const getApprovalCalls = useCallback(async () => {
+    if (!address) {
       return [];
     }
+    const requestAmount = await REQUEST_AMOUNT({
+      contract: getContract({
+        address: CONTRACT,
+        client,
+        chain: base,
+      }),
+    });
     const approvalTx = approve({
       contract: getContract({
         address: TOKEN,
         client,
         chain: base,
       }),
-      amount: requestAmount,
+      amount: requestAmount.toString(),
       spender: CONTRACT,
     });
     const encodedApprovalTx = await encode(approvalTx);
+    return [
+      {
+        to: TOKEN,
+        data: encodedApprovalTx,
+      },
+    ];
+  }, [address]);
+
+  const getTxCalls = useCallback(async () => {
+    const completerAddress = selectedUser?.verified_addresses?.primary?.eth_address ?? selectedUser?.custody_address;
+    const requesterFid = context?.user.fid;
+    const completerFid = selectedUser?.fid;
+    if (!completerAddress || !requesterFid || !completerFid) {
+      return [];
+    }
     const tx = requestFlockIn({
       contract: getContract({
         address: CONTRACT,
         client,
         chain: base,
       }),
-      requesterFid: BigInt(selectedUser?.fid ?? 0),
+      requesterFid: BigInt(requesterFid),
       completer: completerAddress,
-      completerFid: BigInt(selectedUser?.fid ?? 0),
+      completerFid: BigInt(completerFid),
+      message: videoDescription,
     });
     const encodedTx = await encode(tx);
     return [
-      {
-        to: TOKEN,
-        data: encodedApprovalTx,
-      },
       {
         to: CONTRACT,
         data: encodedTx,
       },
     ];
-  }, [selectedUser, requestAmount]);
+  }, [selectedUser, context, videoDescription]);
 
   return (
     <div>
@@ -79,15 +139,38 @@ export const VideoRequest: FC = () => {
         {videoDescription.length}/{MAX_CHARS} characters
       </div>
 
-      <Transaction
-        calls={getCalls}
-      >
-        <TransactionButton
-          className="bg-blue-500 text-white p-2 rounded-md"
-          text="Request Video"
-        />
-      </Transaction>
+      <div className="flex flex-col gap-2 text-sm text-gray-500 mt-1">
+        <div>
+          {allowanceAmount.toString()}
+        </div>
+        <div>
+          {requestAmount.toString()}
+        </div>
+        <div>
+          {balance.toString()}
+        </div>
+      </div>
+      {approvalRequired && (
+        <Transaction
+          calls={getApprovalCalls}
+          onSuccess={() => {
+            setApprovalRequired(false);
+          }}
+        >
+          <TransactionButton className="bg-blue-500 text-white p-2 rounded-md" text="Approve" />
+        </Transaction>
+      )}
 
+      {!approvalRequired && (
+        <Transaction
+          calls={getTxCalls}
+        >
+          <TransactionButton
+            className="bg-blue-500 text-white p-2 rounded-md"
+            text="Request Video"
+          />
+        </Transaction>
+      )}
     </div>
   );
 };
