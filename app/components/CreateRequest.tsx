@@ -124,6 +124,33 @@ export const CreateRequest: FC<Props> = ({ onSuccess }) => {
     ];
   }, [selectedUser, context, videoDescription]);
 
+  // Function to send notification to the completer
+  const sendNotification = useCallback(async () => {
+    if (!selectedUser?.fid || !context?.user.username || !videoDescription) {
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/notifications', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          completerFid: selectedUser.fid,
+          requesterUsername: context.user.username,
+          message: videoDescription,
+        }),
+      });
+
+      if (!response.ok) {
+        console.error('Failed to send notification');
+      }
+    } catch (error) {
+      console.error('Error sending notification:', error);
+    }
+  }, [selectedUser, context, videoDescription]);
+
   return (
     <div>
       <h1>Describe Your Video Request</h1>
@@ -150,7 +177,11 @@ export const CreateRequest: FC<Props> = ({ onSuccess }) => {
       {!approvalRequired && (
         <Transaction
           calls={getTxCalls}
-          onSuccess={onSuccess}
+          onSuccess={() => {
+            // Send notification after successful request creation
+            sendNotification();
+            onSuccess();
+          }}
         >
           <TransactionButton
             className="bg-blue-500 text-white p-2 rounded-md"
