@@ -64,6 +64,7 @@ export const CreateRequest: FC<Props> = ({ onSuccess }) => {
           address,
         }),
       ]);
+      setBalance(balance);
       setApprovalRequired(allowanceAmount < requestAmount);
     };
     checkApproval();
