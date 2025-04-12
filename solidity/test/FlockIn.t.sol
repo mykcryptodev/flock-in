@@ -22,13 +22,14 @@ contract FlockInTest is Test {
     uint256 public aliceFid = 1;
     uint256 public bobFid = 2;
     uint256 public charlieFid = 3;
+    uint256 public constant TEST_AMOUNT = 10 * 10**18;
 
     function setUp() public {
         // Deploy mock token
         token = new MockToken();
         
         // Deploy FlockIn contract
-        flockIn = new FlockIn(address(token));
+        flockIn = new FlockIn();
         
         // Mint tokens to test accounts
         token.transfer(alice, 10000 * 10**18);
@@ -41,7 +42,7 @@ contract FlockInTest is Test {
         token.approve(address(flockIn), type(uint256).max);
         
         string memory message = "Hey Bob, can you help me with this?";
-        flockIn.requestFlockIn(aliceFid, bob, bobFid, message);
+        flockIn.requestFlockIn(aliceFid, bob, bobFid, address(token), TEST_AMOUNT, message);
         
         // Check request was created correctly
         (
@@ -50,6 +51,7 @@ contract FlockInTest is Test {
             uint256 requesterFid,
             address completer,
             uint256 completerFid,
+            address requestToken,
             uint256 amount,
             bool isCompleted,
             bool isCancelled,
@@ -62,15 +64,16 @@ contract FlockInTest is Test {
         assertEq(requesterFid, aliceFid);
         assertEq(completer, bob);
         assertEq(completerFid, bobFid);
-        assertEq(amount, flockIn.REQUEST_AMOUNT());
+        assertEq(requestToken, address(token));
+        assertEq(amount, TEST_AMOUNT);
         assertEq(isCompleted, false);
         assertEq(isCancelled, false);
         assertEq(storedMessage, message);
         assertEq(completionProof, "");
         
         // Check token transfer
-        assertEq(token.balanceOf(address(flockIn)), flockIn.REQUEST_AMOUNT());
-        assertEq(token.balanceOf(alice), 10000 * 10**18 - flockIn.REQUEST_AMOUNT());
+        assertEq(token.balanceOf(address(flockIn)), TEST_AMOUNT);
+        assertEq(token.balanceOf(alice), 10000 * 10**18 - TEST_AMOUNT);
         vm.stopPrank();
     }
 
@@ -78,7 +81,7 @@ contract FlockInTest is Test {
         // Create request
         vm.startPrank(alice);
         token.approve(address(flockIn), type(uint256).max);
-        flockIn.requestFlockIn(aliceFid, bob, bobFid, "Test message");
+        flockIn.requestFlockIn(aliceFid, bob, bobFid, address(token), TEST_AMOUNT, "Test message");
         vm.stopPrank();
         
         // Complete request as Bob
@@ -88,7 +91,7 @@ contract FlockInTest is Test {
         uint256 bobBalanceAfter = token.balanceOf(bob);
         
         // Check Bob received the tokens
-        assertEq(bobBalanceAfter - bobBalanceBefore, flockIn.REQUEST_AMOUNT());
+        assertEq(bobBalanceAfter - bobBalanceBefore, TEST_AMOUNT);
         assertEq(token.balanceOf(address(flockIn)), 0);
         vm.stopPrank();
     }
@@ -97,7 +100,7 @@ contract FlockInTest is Test {
         // Create request
         vm.startPrank(alice);
         token.approve(address(flockIn), type(uint256).max);
-        flockIn.requestFlockIn(aliceFid, bob, bobFid, "Test message");
+        flockIn.requestFlockIn(aliceFid, bob, bobFid, address(token), TEST_AMOUNT, "Test message");
         
         // Cancel request
         uint256 aliceBalanceBefore = token.balanceOf(alice);
@@ -105,7 +108,7 @@ contract FlockInTest is Test {
         uint256 aliceBalanceAfter = token.balanceOf(alice);
         
         // Check Alice received her tokens back
-        assertEq(aliceBalanceAfter - aliceBalanceBefore, flockIn.REQUEST_AMOUNT());
+        assertEq(aliceBalanceAfter - aliceBalanceBefore, TEST_AMOUNT);
         assertEq(token.balanceOf(address(flockIn)), 0);
         vm.stopPrank();
     }
@@ -114,8 +117,8 @@ contract FlockInTest is Test {
         // Create requests
         vm.startPrank(alice);
         token.approve(address(flockIn), type(uint256).max);
-        flockIn.requestFlockIn(aliceFid, bob, bobFid, "First message");
-        flockIn.requestFlockIn(aliceFid, charlie, charlieFid, "Second message");
+        flockIn.requestFlockIn(aliceFid, bob, bobFid, address(token), TEST_AMOUNT, "First message");
+        flockIn.requestFlockIn(aliceFid, charlie, charlieFid, address(token), TEST_AMOUNT, "Second message");
         vm.stopPrank();
 
         // Test getRequestsMadeByFid
@@ -138,7 +141,7 @@ contract FlockInTest is Test {
         // Create request
         vm.startPrank(alice);
         token.approve(address(flockIn), type(uint256).max);
-        flockIn.requestFlockIn(aliceFid, bob, bobFid, "Test message");
+        flockIn.requestFlockIn(aliceFid, bob, bobFid, address(token), TEST_AMOUNT, "Test message");
         vm.stopPrank();
         
         // Try to complete as Charlie
@@ -151,7 +154,7 @@ contract FlockInTest is Test {
         // Create request
         vm.startPrank(alice);
         token.approve(address(flockIn), type(uint256).max);
-        flockIn.requestFlockIn(aliceFid, bob, bobFid, "Test message");
+        flockIn.requestFlockIn(aliceFid, bob, bobFid, address(token), TEST_AMOUNT, "Test message");
         vm.stopPrank();
         
         // Try to cancel as Bob
@@ -164,7 +167,7 @@ contract FlockInTest is Test {
         // Create request
         vm.startPrank(alice);
         token.approve(address(flockIn), type(uint256).max);
-        flockIn.requestFlockIn(aliceFid, bob, bobFid, "Test message");
+        flockIn.requestFlockIn(aliceFid, bob, bobFid, address(token), TEST_AMOUNT, "Test message");
         
         // Cancel request
         flockIn.cancelRequest(0);
@@ -180,7 +183,7 @@ contract FlockInTest is Test {
         // Create request
         vm.startPrank(alice);
         token.approve(address(flockIn), type(uint256).max);
-        flockIn.requestFlockIn(aliceFid, bob, bobFid, "Test message");
+        flockIn.requestFlockIn(aliceFid, bob, bobFid, address(token), TEST_AMOUNT, "Test message");
         vm.stopPrank();
         
         // Complete request as Bob
@@ -198,7 +201,7 @@ contract FlockInTest is Test {
         // Create request
         vm.startPrank(alice);
         token.approve(address(flockIn), type(uint256).max);
-        flockIn.requestFlockIn(aliceFid, bob, bobFid, "Test message");
+        flockIn.requestFlockIn(aliceFid, bob, bobFid, address(token), TEST_AMOUNT, "Test message");
         vm.stopPrank();
         
         // Complete request as Bob
@@ -214,7 +217,7 @@ contract FlockInTest is Test {
         // Create request
         vm.startPrank(alice);
         token.approve(address(flockIn), type(uint256).max);
-        flockIn.requestFlockIn(aliceFid, bob, bobFid, "Test message");
+        flockIn.requestFlockIn(aliceFid, bob, bobFid, address(token), TEST_AMOUNT, "Test message");
         
         // Cancel request
         flockIn.cancelRequest(0);
@@ -228,7 +231,7 @@ contract FlockInTest is Test {
         // Create request
         vm.startPrank(alice);
         token.approve(address(flockIn), type(uint256).max);
-        flockIn.requestFlockIn(aliceFid, bob, bobFid, "Test message");
+        flockIn.requestFlockIn(aliceFid, bob, bobFid, address(token), TEST_AMOUNT, "Test message");
         vm.stopPrank();
         
         // Complete request as Bob with proof
@@ -247,7 +250,7 @@ contract FlockInTest is Test {
         // Create and complete request
         vm.startPrank(alice);
         token.approve(address(flockIn), type(uint256).max);
-        flockIn.requestFlockIn(aliceFid, bob, bobFid, "Test message");
+        flockIn.requestFlockIn(aliceFid, bob, bobFid, address(token), TEST_AMOUNT, "Test message");
         vm.stopPrank();
         
         vm.startPrank(bob);
@@ -267,7 +270,7 @@ contract FlockInTest is Test {
         // Create and complete request
         vm.startPrank(alice);
         token.approve(address(flockIn), type(uint256).max);
-        flockIn.requestFlockIn(aliceFid, bob, bobFid, "Test message");
+        flockIn.requestFlockIn(aliceFid, bob, bobFid, address(token), TEST_AMOUNT, "Test message");
         vm.stopPrank();
         
         vm.startPrank(bob);
@@ -284,7 +287,7 @@ contract FlockInTest is Test {
         // Create request
         vm.startPrank(alice);
         token.approve(address(flockIn), type(uint256).max);
-        flockIn.requestFlockIn(aliceFid, bob, bobFid, "Test message");
+        flockIn.requestFlockIn(aliceFid, bob, bobFid, address(token), TEST_AMOUNT, "Test message");
         vm.stopPrank();
         
         // Try to update proof before completion
@@ -297,7 +300,7 @@ contract FlockInTest is Test {
         // Create and cancel request
         vm.startPrank(alice);
         token.approve(address(flockIn), type(uint256).max);
-        flockIn.requestFlockIn(aliceFid, bob, bobFid, "Test message");
+        flockIn.requestFlockIn(aliceFid, bob, bobFid, address(token), TEST_AMOUNT, "Test message");
         flockIn.cancelRequest(0);
         vm.stopPrank();
         

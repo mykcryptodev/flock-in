@@ -18,6 +18,7 @@ contract FlockIn is ReentrancyGuard {
         uint256 requesterFid;
         address completer;
         uint256 completerFid;
+        address token;
         uint256 amount;
         bool isCompleted;
         bool isCancelled;
@@ -34,35 +35,37 @@ contract FlockIn is ReentrancyGuard {
     mapping(uint256 => uint256[]) private requestIdsByRequesterFid;
     mapping(uint256 => uint256[]) private requestIdsByCompleterFid;
 
-    /// @notice The ERC20 token used for requests
-    IERC20 public immutable token;
-
-    /// @notice The fixed amount required for each request
-    uint256 public constant REQUEST_AMOUNT = 10 * 10**6;
-    
     /// @notice Counter to generate unique request IDs
     uint256 public requestCounter;
 
     // Events remain the same
-    event RequestCreated(uint256 indexed requestId, address indexed requester, address indexed completer, uint256 amount, string message);
+    event RequestCreated(uint256 indexed requestId, address indexed requester, address indexed completer, address token, uint256 amount, string message);
     event RequestCompleted(uint256 indexed requestId, address indexed completer, string completionProof);
     event RequestCancelled(uint256 indexed requestId, address indexed requester);
     event CompletionProofUpdated(uint256 indexed requestId, address indexed completer, string newProof);
 
-    constructor(address _token) {
-        require(_token != address(0), "Invalid token address");
-        token = IERC20(_token);
-    }
+    constructor() {}
 
     /// @notice Creates a new request by transferring tokens to the contract
+    /// @param requesterFid The Farcaster ID of the requester
+    /// @param completer The address of the completer
+    /// @param completerFid The Farcaster ID of the completer
+    /// @param token The address of the ERC20 token to use
+    /// @param amount The amount of tokens to transfer
+    /// @param message The message associated with the request
     function requestFlockIn(
         uint256 requesterFid,
         address completer,
         uint256 completerFid,
+        address token,
+        uint256 amount,
         string memory message
     ) external nonReentrant {
         require(completer != address(0), "Invalid completer address");
-        token.safeTransferFrom(msg.sender, address(this), REQUEST_AMOUNT);
+        require(token != address(0), "Invalid token address");
+        require(amount > 0, "Amount must be greater than 0");
+        
+        IERC20(token).safeTransferFrom(msg.sender, address(this), amount);
         
         uint256 requestId = requestCounter++;
         Request memory newRequest = Request({
@@ -71,7 +74,8 @@ contract FlockIn is ReentrancyGuard {
             requesterFid: requesterFid,
             completer: completer,
             completerFid: completerFid,
-            amount: REQUEST_AMOUNT,
+            token: token,
+            amount: amount,
             isCompleted: false,
             isCancelled: false,
             message: message,
@@ -86,7 +90,7 @@ contract FlockIn is ReentrancyGuard {
         requestIdsByRequesterFid[requesterFid].push(requestId);
         requestIdsByCompleterFid[completerFid].push(requestId);
 
-        emit RequestCreated(requestId, msg.sender, completer, REQUEST_AMOUNT, message);
+        emit RequestCreated(requestId, msg.sender, completer, token, amount, message);
     }
 
     /// @notice Completes a request and transfers the funds to the completer
@@ -98,7 +102,7 @@ contract FlockIn is ReentrancyGuard {
 
         request.isCompleted = true;
         request.completionProof = completionProof;
-        token.safeTransfer(msg.sender, request.amount);
+        IERC20(request.token).safeTransfer(msg.sender, request.amount);
         
         emit RequestCompleted(requestId, msg.sender, completionProof);
     }
@@ -111,7 +115,7 @@ contract FlockIn is ReentrancyGuard {
         require(!request.isCancelled, "Request already cancelled");
         
         request.isCancelled = true;
-        token.safeTransfer(msg.sender, request.amount);
+        IERC20(request.token).safeTransfer(msg.sender, request.amount);
         
         emit RequestCancelled(requestId, msg.sender);
     }

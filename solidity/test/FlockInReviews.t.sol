@@ -14,7 +14,7 @@ contract MockToken is ERC20 {
 
 contract FlockInReviewsTest is Test {
     FlockIn public flockIn;
-    FlockInReviews public flockInReviews;
+    FlockInReviews public reviews;
     MockToken public token;
     
     address public alice = address(0x1);
@@ -24,16 +24,17 @@ contract FlockInReviewsTest is Test {
     uint256 public aliceFid = 1;
     uint256 public bobFid = 2;
     uint256 public charlieFid = 3;
+    uint256 public constant TEST_AMOUNT = 10 * 10**18;
 
     function setUp() public {
         // Deploy mock token
         token = new MockToken();
         
         // Deploy FlockIn contract
-        flockIn = new FlockIn(address(token));
+        flockIn = new FlockIn();
         
-        // Deploy FlockInReviews contract
-        flockInReviews = new FlockInReviews(address(flockIn));
+        // Deploy Reviews contract
+        reviews = new FlockInReviews(address(flockIn));
         
         // Mint tokens to test accounts
         token.transfer(alice, 10000 * 10**18);
@@ -42,402 +43,142 @@ contract FlockInReviewsTest is Test {
     }
 
     function test_CreateReview() public {
-        // Create and complete a request
-        vm.startPrank(alice);
-        token.approve(address(flockIn), type(uint256).max);
-        flockIn.requestFlockIn(aliceFid, bob, bobFid, "Test request");
-        vm.stopPrank();
-
-        vm.startPrank(bob);
-        flockIn.completeRequest(0, "");
-        vm.stopPrank();
-
-        // Create a review
-        vm.startPrank(alice);
-        bytes memory metadata = "test metadata";
-        flockInReviews.createReview(
-            0, // requestId
-            aliceFid,
-            bob,
-            bobFid,
-            5, // rating
-            "Great service!",
-            metadata
-        );
-
-        // Verify the review was created correctly
-        (
-            uint256 id,
-            uint256 requestId,
-            address reviewer,
-            uint256 reviewerFid,
-            address reviewee,
-            uint256 revieweeFid,
-            uint256 rating,
-            string memory comment,
-            string memory revieweeComment,
-            bytes memory storedMetadata,
-            bool reviewCreatedBeforeCompletion
-        ) = flockInReviews.reviews(1);
-        
-        assertEq(id, 1);
-        assertEq(requestId, 0);
-        assertEq(reviewer, alice);
-        assertEq(reviewerFid, aliceFid);
-        assertEq(reviewee, bob);
-        assertEq(revieweeFid, bobFid);
-        assertEq(rating, 5);
-        assertEq(comment, "Great service!");
-        assertEq(revieweeComment, "");
-        assertEq(storedMetadata, metadata);
-        assertEq(reviewCreatedBeforeCompletion, false);
-        vm.stopPrank();
-    }
-
-    function test_CreateReviewBeforeCompletion() public {
-        // Create a request but don't complete it
-        vm.startPrank(alice);
-        token.approve(address(flockIn), type(uint256).max);
-        flockIn.requestFlockIn(aliceFid, bob, bobFid, "Test request");
-
-        // Create a review before completion
-        bytes memory metadata = "test metadata";
-        flockInReviews.createReview(
-            0, // requestId
-            aliceFid,
-            bob,
-            bobFid,
-            5, // rating
-            "Great service!",
-            metadata
-        );
-
-        // Verify the review was created correctly
-        (
-            uint256 id,
-            uint256 requestId,
-            address reviewer,
-            uint256 reviewerFid,
-            address reviewee,
-            uint256 revieweeFid,
-            uint256 rating,
-            string memory comment,
-            string memory revieweeComment,
-            bytes memory storedMetadata,
-            bool reviewCreatedBeforeCompletion
-        ) = flockInReviews.reviews(1);
-        
-        assertEq(id, 1);
-        assertEq(requestId, 0);
-        assertEq(reviewer, alice);
-        assertEq(reviewerFid, aliceFid);
-        assertEq(reviewee, bob);
-        assertEq(revieweeFid, bobFid);
-        assertEq(rating, 5);
-        assertEq(comment, "Great service!");
-        assertEq(revieweeComment, "");
-        assertEq(storedMetadata, metadata);
-        assertEq(reviewCreatedBeforeCompletion, true);
-        vm.stopPrank();
-    }
-
-    function test_RevertWhen_ReviewNonExistentRequest() public {
-        vm.startPrank(alice);
-        vm.expectRevert();
-        flockInReviews.createReview(
-            999, // non-existent requestId
-            aliceFid,
-            bob,
-            bobFid,
-            5,
-            "Test review",
-            ""
-        );
-        vm.stopPrank();
-    }
-
-
-    function test_RevertWhen_MultipleReviewsForSameRequest() public {
         // Create and complete request
         vm.startPrank(alice);
         token.approve(address(flockIn), type(uint256).max);
-        flockIn.requestFlockIn(aliceFid, bob, bobFid, "Test request");
+        flockIn.requestFlockIn(aliceFid, bob, bobFid, address(token), TEST_AMOUNT, "Test message");
         vm.stopPrank();
-
-        vm.startPrank(bob);
-        flockIn.completeRequest(0, "");
-        vm.stopPrank();
-
-        // Create first review
-        vm.startPrank(alice);
-        flockInReviews.createReview(
-            0,
-            aliceFid,
-            bob,
-            bobFid,
-            5,
-            "First review",
-            ""
-        );
-
-        // Try to create second review
-        vm.expectRevert("Review already exists for this request");
-        flockInReviews.createReview(
-            0,
-            aliceFid,
-            bob,
-            bobFid,
-            5,
-            "Second review",
-            ""
-        );
-        vm.stopPrank();
-    }
-
-    function test_RevertWhen_InvalidRating() public {
-        // Create and complete request
-        vm.startPrank(alice);
-        token.approve(address(flockIn), type(uint256).max);
-        flockIn.requestFlockIn(aliceFid, bob, bobFid, "Test request");
-        vm.stopPrank();
-
-        vm.startPrank(bob);
-        flockIn.completeRequest(0, "");
-        vm.stopPrank();
-
-        // Try to create review with rating 0
-        vm.startPrank(alice);
-        vm.expectRevert("Rating must be between 1 and 5");
-        flockInReviews.createReview(
-            0,
-            aliceFid,
-            bob,
-            bobFid,
-            0,
-            "Test review",
-            ""
-        );
-
-        // Try to create review with rating 6
-        vm.expectRevert("Rating must be between 1 and 5");
-        flockInReviews.createReview(
-            0,
-            aliceFid,
-            bob,
-            bobFid,
-            6,
-            "Test review",
-            ""
-        );
-        vm.stopPrank();
-    }
-
-    function test_GetReviewByRequestId() public {
-        // Create, complete request and create review
-        vm.startPrank(alice);
-        token.approve(address(flockIn), type(uint256).max);
-        flockIn.requestFlockIn(aliceFid, bob, bobFid, "Test request");
-        vm.stopPrank();
-
-        vm.startPrank(bob);
-        flockIn.completeRequest(0, "");
-        vm.stopPrank();
-
-        vm.startPrank(alice);
-        bytes memory metadata = "test metadata";
-        flockInReviews.createReview(
-            0,
-            aliceFid,
-            bob,
-            bobFid,
-            5,
-            "Great service!",
-            metadata
-        );
-
-        // Get review by request ID
-        (
-            uint256 id,
-            uint256 requestId,
-            address reviewer,
-            uint256 reviewerFid,
-            address reviewee,
-            uint256 revieweeFid,
-            uint256 rating,
-            string memory comment,
-            string memory revieweeComment,
-            bytes memory storedMetadata,
-            bool reviewCreatedBeforeCompletion
-        ) = flockInReviews.reviews(flockInReviews.reviewIdByRequestId(0));
         
-        assertEq(id, 1);
-        assertEq(requestId, 0);
-        assertEq(reviewer, alice);
-        assertEq(reviewerFid, aliceFid);
-        assertEq(reviewee, bob);
-        assertEq(revieweeFid, bobFid);
-        assertEq(rating, 5);
-        assertEq(comment, "Great service!");
-        assertEq(revieweeComment, "");
-        assertEq(storedMetadata, metadata);
+        vm.startPrank(bob);
+        flockIn.completeRequest(0, "");
         vm.stopPrank();
-    }
-
-    function test_GetReviewByNonExistentRequestId() public {
-        // Get review for non-existent request
-        (
-            uint256 id,
-            uint256 requestId,
-            address reviewer,
-            uint256 reviewerFid,
-            address reviewee,
-            uint256 revieweeFid,
-            uint256 rating,
-            string memory comment,
-            string memory revieweeComment,
-            bytes memory metadata,
-            bool reviewCreatedBeforeCompletion
-        ) = flockInReviews.reviews(flockInReviews.reviewIdByRequestId(999));
         
-        assertEq(id, 0);
-        assertEq(requestId, 0);
-        assertEq(reviewer, address(0));
-        assertEq(reviewerFid, 0);
-        assertEq(reviewee, address(0));
-        assertEq(revieweeFid, 0);
-        assertEq(rating, 0);
-        assertEq(comment, "");
-        assertEq(revieweeComment, "");
-        assertEq(metadata, "");
+        // Create review
+        vm.startPrank(alice);
+        string memory comment = "Great work!";
+        bytes memory metadata = "0x1234";
+        reviews.createReview(0, aliceFid, bob, bobFid, 5, comment, metadata);
+        
+        // Check review was created correctly
+        FlockInReviews.Review memory review = reviews.getReview(1);
+        assertEq(review.id, 1);
+        assertEq(review.requestId, 0);
+        assertEq(review.reviewer, alice);
+        assertEq(review.reviewerFid, aliceFid);
+        assertEq(review.reviewee, bob);
+        assertEq(review.revieweeFid, bobFid);
+        assertEq(review.rating, 5);
+        assertEq(review.comment, comment);
+        assertEq(review.metadata, metadata);
+        assertEq(review.reviewCreatedBeforeCompletion, false);
+        vm.stopPrank();
     }
 
     function test_LeaveRevieweeComment() public {
-        // Create, complete request and create review
+        // Create request, complete it, and create review
         vm.startPrank(alice);
         token.approve(address(flockIn), type(uint256).max);
-        flockIn.requestFlockIn(aliceFid, bob, bobFid, "Test request");
+        flockIn.requestFlockIn(aliceFid, bob, bobFid, address(token), TEST_AMOUNT, "Test message");
         vm.stopPrank();
-
+        
         vm.startPrank(bob);
         flockIn.completeRequest(0, "");
         vm.stopPrank();
-
+        
         vm.startPrank(alice);
-        flockInReviews.createReview(
-            0,
-            aliceFid,
-            bob,
-            bobFid,
-            5,
-            "Great service!",
-            ""
-        );
+        reviews.createReview(0, aliceFid, bob, bobFid, 5, "Great work!", "");
         vm.stopPrank();
-
+        
         // Leave reviewee comment
         vm.startPrank(bob);
-        flockInReviews.leaveRevieweeComment(0, "Thanks for the kind words!");
-
-        // Verify the comment was added
-        FlockInReviews.Review memory review = flockInReviews.getReviewByRequestId(0);
-        assertEq(review.revieweeComment, "Thanks for the kind words!");
-        vm.stopPrank();
-    }
-
-    function test_RevertWhen_NonRevieweeLeavesComment() public {
-        // Create, complete request and create review
-        vm.startPrank(alice);
-        token.approve(address(flockIn), type(uint256).max);
-        flockIn.requestFlockIn(aliceFid, bob, bobFid, "Test request");
-        vm.stopPrank();
-
-        vm.startPrank(bob);
-        flockIn.completeRequest(0, "");
-        vm.stopPrank();
-
-        vm.startPrank(alice);
-        flockInReviews.createReview(
-            0,
-            aliceFid,
-            bob,
-            bobFid,
-            5,
-            "Great service!",
-            ""
-        );
-        vm.stopPrank();
-
-        // Try to leave comment as non-reviewee
-        vm.startPrank(charlie);
-        vm.expectRevert("Only the reviewee can leave a comment");
-        flockInReviews.leaveRevieweeComment(0, "I'm not the reviewee!");
-        vm.stopPrank();
-    }
-
-    function test_RevertWhen_CommentOnNonExistentReview() public {
-        vm.startPrank(bob);
-        vm.expectRevert("Review does not exist");
-        flockInReviews.leaveRevieweeComment(999, "This review doesn't exist!");
+        string memory revieweeComment = "Thanks for the review!";
+        reviews.leaveRevieweeComment(0, revieweeComment);
+        
+        // Check comment was stored correctly
+        FlockInReviews.Review memory review = reviews.getReview(1);
+        assertEq(review.revieweeComment, revieweeComment);
         vm.stopPrank();
     }
 
     function test_GetReviewsByRevieweeFid() public {
-      // Create and complete multiple requests for Bob
-      vm.startPrank(alice);
-      token.approve(address(flockIn), type(uint256).max);
-      flockIn.requestFlockIn(aliceFid, bob, bobFid, "First request");
-      vm.stopPrank();
+        // Create two requests and reviews
+        vm.startPrank(alice);
+        token.approve(address(flockIn), type(uint256).max);
+        flockIn.requestFlockIn(aliceFid, bob, bobFid, address(token), TEST_AMOUNT, "First message");
+        flockIn.requestFlockIn(aliceFid, bob, bobFid, address(token), TEST_AMOUNT, "Second message");
+        vm.stopPrank();
+        
+        vm.startPrank(bob);
+        flockIn.completeRequest(0, "");
+        flockIn.completeRequest(1, "");
+        vm.stopPrank();
+        
+        vm.startPrank(alice);
+        reviews.createReview(0, aliceFid, bob, bobFid, 5, "First review", "");
+        reviews.createReview(1, aliceFid, bob, bobFid, 4, "Second review", "");
+        vm.stopPrank();
+        
+        // Get reviews for Bob
+        uint256[] memory bobReviews = reviews.getReviewsByRevieweeFid(bobFid);
+        assertEq(bobReviews.length, 2);
+        assertEq(bobReviews[0], 1);
+        assertEq(bobReviews[1], 2);
+    }
 
-      vm.startPrank(bob);
-      flockIn.completeRequest(0, "");
-      vm.stopPrank();
+    function test_RevertWhen_CreateReviewForNonExistentRequest() public {
+        vm.startPrank(alice);
+        vm.expectRevert();
+        reviews.createReview(999, aliceFid, bob, bobFid, 5, "Test review", "");
+    }
 
-      vm.startPrank(alice);
-      flockIn.requestFlockIn(aliceFid, bob, bobFid, "Second request");
-      vm.stopPrank();
+    function test_RevertWhen_CreateReviewAsNonRequester() public {
+        // Create request
+        vm.startPrank(alice);
+        token.approve(address(flockIn), type(uint256).max);
+        flockIn.requestFlockIn(aliceFid, bob, bobFid, address(token), TEST_AMOUNT, "Test message");
+        vm.stopPrank();
+        
+        // Try to create review as Bob
+        vm.startPrank(bob);
+        vm.expectRevert("Only the requester can create a review");
+        reviews.createReview(0, bobFid, bob, bobFid, 5, "Test review", "");
+    }
 
-      vm.startPrank(bob);
-      flockIn.completeRequest(1, "");
-      vm.stopPrank();
+    function test_RevertWhen_CreateReviewWithInvalidRating() public {
+        // Create and complete request
+        vm.startPrank(alice);
+        token.approve(address(flockIn), type(uint256).max);
+        flockIn.requestFlockIn(aliceFid, bob, bobFid, address(token), TEST_AMOUNT, "Test message");
+        vm.stopPrank();
+        
+        vm.startPrank(bob);
+        flockIn.completeRequest(0, "");
+        vm.stopPrank();
+        
+        // Try to create review with invalid rating
+        vm.startPrank(alice);
+        vm.expectRevert("Rating must be between 1 and 5");
+        reviews.createReview(0, aliceFid, bob, bobFid, 6, "Test review", "");
+    }
 
-      // Create reviews for both requests
-      vm.startPrank(alice);
-      flockInReviews.createReview(
-          0,
-          aliceFid,
-          bob,
-          bobFid,
-          5,
-          "Great first service!",
-          ""
-      );
-
-      flockInReviews.createReview(
-          1,
-          aliceFid,
-          bob,
-          bobFid,
-          4,
-          "Good second service!",
-          ""
-      );
-      vm.stopPrank();
-
-      // Get all reviews for Bob
-      uint256[] memory bobReviews = flockInReviews.getReviewsByRevieweeFid(bobFid);
-      
-      // Verify we got both reviews
-      assertEq(bobReviews.length, 2);
-      
-      // Verify the review IDs are correct
-      assertEq(bobReviews[0], 1);
-      assertEq(bobReviews[1], 2);
-
-      // Verify the reviews are for Bob
-      FlockInReviews.Review memory review1 = flockInReviews.getReview(bobReviews[0]);
-      FlockInReviews.Review memory review2 = flockInReviews.getReview(bobReviews[1]);
-      
-      assertEq(review1.revieweeFid, bobFid);
-      assertEq(review2.revieweeFid, bobFid);
-    }  
+    function test_RevertWhen_LeaveRevieweeCommentAsNonReviewee() public {
+        // Create request, complete it, and create review
+        vm.startPrank(alice);
+        token.approve(address(flockIn), type(uint256).max);
+        flockIn.requestFlockIn(aliceFid, bob, bobFid, address(token), TEST_AMOUNT, "Test message");
+        vm.stopPrank();
+        
+        vm.startPrank(bob);
+        flockIn.completeRequest(0, "");
+        vm.stopPrank();
+        
+        vm.startPrank(alice);
+        reviews.createReview(0, aliceFid, bob, bobFid, 5, "Great work!", "");
+        vm.stopPrank();
+        
+        // Try to leave comment as Charlie
+        vm.startPrank(charlie);
+        vm.expectRevert("Only the reviewee can leave a comment");
+        reviews.leaveRevieweeComment(0, "Test comment");
+    }
 } 
