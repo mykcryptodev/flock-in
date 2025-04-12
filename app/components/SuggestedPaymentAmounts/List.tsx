@@ -22,9 +22,10 @@ type Props = {
   showTitle?: boolean;
   message?: string;
   onClick?: (amount: bigint, token: string) => void;
+  className?: string;
 };
 
-export const SuggestedPaymentAmountsList = ({ address, onRemove, showTitle, message, onClick }: Props) => {
+export const SuggestedPaymentAmountsList = ({ address, onRemove, showTitle, message, onClick, className }: Props) => {
   const { address: userAddress } = useAccount();
   const [userPreferredPaymentAmounts, setUserPreferredPaymentAmounts] = useState<{
     token: string;
@@ -71,8 +72,12 @@ export const SuggestedPaymentAmountsList = ({ address, onRemove, showTitle, mess
     return null;
   };
 
+  if (userPreferredPaymentAmounts.length === 0) {
+    return null;
+  }
+
   return (
-    <div className="flex flex-col gap-2">
+    <div className={`flex flex-col gap-2 ${className}`}>
       {showTitle && <h2 className="text-sm">Suggested Payment Amounts</h2>}
       {message && <p className="text-xs">{message}</p>}
       {userPreferredPaymentAmounts.map((amount, index) => (
