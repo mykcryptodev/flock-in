@@ -1,0 +1,96 @@
+import { FC, useEffect } from "react";
+import { getSuggestedAmountsByAddress } from "@/thirdweb/8453/0xf0af2c550b51f3e4fe1b7dcfd4ac8a7093f54b94";
+
+import { createThirdwebClient, getContract, toTokens } from "thirdweb";
+import { CHAIN, SUGGESTED_PAYMENT_AMOUNTS_CONTRACT } from "../../constants";
+import { useState } from "react";
+import { TokenName, TokenProvider, TokenSymbol } from "thirdweb/react";
+import { TokenIcon } from "thirdweb/react";
+import { useReadContract } from "thirdweb/react";
+import { useAccount } from "wagmi";
+import { Remove } from "./Remove";
+import { isAddress, isAddressEqual } from "viem";
+
+const client = createThirdwebClient({
+  clientId: process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID!,
+});
+
+type Props = {
+  address: string;
+  onRemove?: () => void;
+  showTitle?: boolean;
+  onClick?: (amount: bigint, token: string) => void;
+};
+
+export const SuggestedPaymentAmountsList = ({ address, onRemove, showTitle, onClick }: Props) => {
+  const { address: userAddress } = useAccount();
+  const [userPreferredPaymentAmounts, setUserPreferredPaymentAmounts] = useState<{
+    token: string;
+    amount: bigint;
+  }[]>([]);
+
+  useEffect(() => {
+    const fetchUserPreferredPaymentAmounts = async () => {
+      const amounts = await getSuggestedAmountsByAddress({
+        contract: getContract({
+          client: client,
+          chain: CHAIN,
+          address: SUGGESTED_PAYMENT_AMOUNTS_CONTRACT,
+        }),
+        completer: address,
+      });
+      if (amounts.length > 0) {
+        setUserPreferredPaymentAmounts(amounts.map((amount) => ({
+          token: amount.token,
+          amount: amount.amount,
+        })));
+      }
+    };
+    fetchUserPreferredPaymentAmounts();
+  }, [address]);
+
+  const TokenAmount: FC<{ amount: bigint, token: string }> = ({ amount, token }) => {
+    const contract = getContract({
+      client,
+      address: token,
+      chain: CHAIN,
+    });
+    const decimals = useReadContract({
+      contract,
+      method: "function decimals() public view returns (uint8)",
+    });
+    if (decimals.data) {
+      return (
+        <div>
+          {Number(toTokens(amount, decimals.data)).toLocaleString()}
+        </div>
+      );
+    }
+    return null;
+  };
+
+  return (
+    <div className="flex flex-col gap-2">
+      {showTitle && <h2 className="text-sm">Suggested Payment Amounts</h2>}
+      {userPreferredPaymentAmounts.map((amount, index) => (
+        <div className="flex w-full justify-between items-center gap-2 bg-white p-3 rounded-md" key={`${amount.token}-${index}`}>
+          <div onClick={() => onClick?.(amount.amount, amount.token)} className="flex gap-2 items-center">
+            <TokenProvider address={amount.token} client={client} chain={CHAIN}>
+              <TokenIcon className="w-4 h-4" />
+              <div className="flex flex-col gap-1">
+                <TokenSymbol />
+              <TokenName />
+              </div>
+            </TokenProvider>
+          </div>
+          <div className="flex gap-2 items-center">
+            <TokenAmount amount={amount.amount} token={amount.token} />
+            {isAddress(address, { strict: false }) && isAddress(userAddress ?? "", { strict: false }) && isAddressEqual(address, userAddress ?? "") && (
+              <Remove token={amount.token} onRemove={onRemove ?? (() => {})} />
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};

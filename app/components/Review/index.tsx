@@ -1,11 +1,12 @@
 import { CHAIN } from "@/app/constants";
 import { REVIEW_CONTRACT } from "@/app/constants";
-import { getReviewByRequestId } from "@/thirdweb/8453/0xbea64ccd92203b1c2dac1d395925cebf42f93be5";
+import { getReviewByRequestId } from "@/thirdweb/8453/0x46270a5549d55898fbbe102f5560313903e7576e";
 import { FC, useEffect, useState } from "react";
 import { getContract } from "thirdweb";
 import { createThirdwebClient } from "thirdweb";
 import WriteReview from "./WriteReview";
-import { useMiniKit } from "@coinbase/onchainkit/minikit";
+import { isAddressEqual } from "viem";
+import { useAccount } from "wagmi";
 
 const client = createThirdwebClient({
   clientId: process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID!,
@@ -13,15 +14,14 @@ const client = createThirdwebClient({
 
 type Props = {
   requestId: string;
-  requesterFid: number;
-  completerFid: number;
+  requester: string;
   completer: string;
 }
 
-export const Review: FC<Props> = ({ requestId, requesterFid, completerFid, completer }) => {
+export const Review: FC<Props> = ({ requestId, requester, completer }) => {
   const [isReviewLoading, setIsReviewLoading] = useState(true);
   const [review, setReview] = useState<Awaited<ReturnType<typeof getReviewByRequestId>> | null>(null);
-  const { context } = useMiniKit();
+  const { address } = useAccount();
 
   useEffect(() => {
     const fetchReview = async () => {
@@ -49,8 +49,8 @@ export const Review: FC<Props> = ({ requestId, requesterFid, completerFid, compl
     return <div>Loading...</div>;
   }
 
-  if (!review?.id && context?.user.fid === requesterFid) {
-    return <WriteReview requestId={requestId} requesterFid={requesterFid} completerFid={completerFid} completer={completer} />;
+  if (!review?.id && isAddressEqual(address ?? "", requester)) {
+    return <WriteReview requestId={requestId} completer={completer} />;
   }
 
   if (!review?.id) {

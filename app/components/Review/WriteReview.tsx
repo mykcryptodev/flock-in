@@ -1,12 +1,13 @@
 import { Transaction } from "@coinbase/onchainkit/transaction";
 import { useState } from "react";
 import { TransactionButton } from "@coinbase/onchainkit/transaction";
-import { createReview } from "@/thirdweb/8453/0xbea64ccd92203b1c2dac1d395925cebf42f93be5";
+import { createReview } from "@/thirdweb/8453/0x46270a5549d55898fbbe102f5560313903e7576e";
 import { useMiniKit } from "@coinbase/onchainkit/minikit";
 import { encode, getContract } from "thirdweb";
 import { REVIEW_CONTRACT } from "../../constants";
 import { CHAIN } from "../../constants";
 import { createThirdwebClient } from "thirdweb";
+import { useAccount } from "wagmi";
 
 const client = createThirdwebClient({
   clientId: process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID!,
@@ -14,17 +15,15 @@ const client = createThirdwebClient({
 
 type Props = {
   requestId: string;
-  requesterFid: number;
-  completerFid: number;
   completer: string;
 }
 
-export default function WriteReview({ requestId, completerFid, completer }: Props) {
+export default function WriteReview({ requestId, completer }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const [review, setReview] = useState("");
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
-  const { context } = useMiniKit();
+  const { address } = useAccount();
 
   const handleSubmit = () => {
     setIsOpen(false);
@@ -33,6 +32,10 @@ export default function WriteReview({ requestId, completerFid, completer }: Prop
   };
 
   const getCalls = async () => {
+    if (!address) {
+      throw new Error("User address not found");
+    }
+
     const tx = createReview({
       contract: getContract({
         address: REVIEW_CONTRACT,
@@ -40,9 +43,7 @@ export default function WriteReview({ requestId, completerFid, completer }: Prop
         chain: CHAIN,
       }),
       requestId: BigInt(requestId),
-      reviewerFid: BigInt(context?.user.fid || 0),
       reviewee: completer,
-      revieweeFid: BigInt(completerFid),
       rating: BigInt(rating),
       comment: review,
       metadata: "0x",
@@ -112,7 +113,7 @@ export default function WriteReview({ requestId, completerFid, completer }: Prop
                 }}
               >
                 <TransactionButton 
-                  disabled={!rating || !review}
+                  disabled={!rating || !review || !address}
                   text="Submit"
                 />
               </Transaction>

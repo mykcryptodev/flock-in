@@ -37,3 +37,8 @@ body {
     text-wrap: balance;
   }
 }
+
+
+.ock-icon-color-foreground {
+  fill: #9ca3af !important;
+}

@@ -150,7 +150,7 @@ completer: AbiParameterToPrimitiveType<{"indexed":true,"internalType":"address",
  */
 export function requestCreatedEvent(filters: RequestCreatedEventFilters = {}) {
   return prepareEvent({
-    signature: "event RequestCreated(uint256 indexed requestId, address indexed requester, address indexed completer, uint256 amount, string message)",
+    signature: "event RequestCreated(uint256 indexed requestId, address indexed requester, address indexed completer, address token, uint256 amount, string message)",
     filters,
   });
 };
@@ -159,41 +159,6 @@ export function requestCreatedEvent(filters: RequestCreatedEventFilters = {}) {
 /**
 * Contract read functions
 */
-
-
-
-/**
- * Calls the "REQUEST_AMOUNT" function on the contract.
- * @param options - The options for the REQUEST_AMOUNT function.
- * @returns The parsed result of the function call.
- * @example
- * ```
- * import { REQUEST_AMOUNT } from "TODO";
- *
- * const result = await REQUEST_AMOUNT();
- *
- * ```
- */
-export async function REQUEST_AMOUNT(
-  options: BaseTransactionOptions
-) {
-  return readContract({
-    contract: options.contract,
-    method: [
-  "0x16d26e3a",
-  [],
-  [
-    {
-      "internalType": "uint256",
-      "name": "",
-      "type": "uint256"
-    }
-  ]
-],
-    params: []
-  });
-};
-
 
 /**
  * Represents the parameters for the "getRequest" function.
@@ -244,19 +209,14 @@ export async function getRequest(
           "type": "address"
         },
         {
-          "internalType": "uint256",
-          "name": "requesterFid",
-          "type": "uint256"
-        },
-        {
           "internalType": "address",
           "name": "completer",
           "type": "address"
         },
         {
-          "internalType": "uint256",
-          "name": "completerFid",
-          "type": "uint256"
+          "internalType": "address",
+          "name": "token",
+          "type": "address"
         },
         {
           "internalType": "uint256",
@@ -344,19 +304,14 @@ export async function getRequestsMadeByAddress(
           "type": "address"
         },
         {
-          "internalType": "uint256",
-          "name": "requesterFid",
-          "type": "uint256"
-        },
-        {
           "internalType": "address",
           "name": "completer",
           "type": "address"
         },
         {
-          "internalType": "uint256",
-          "name": "completerFid",
-          "type": "uint256"
+          "internalType": "address",
+          "name": "token",
+          "type": "address"
         },
         {
           "internalType": "uint256",
@@ -391,106 +346,6 @@ export async function getRequestsMadeByAddress(
   ]
 ],
     params: [options.requester]
-  });
-};
-
-
-/**
- * Represents the parameters for the "getRequestsMadeByFid" function.
- */
-export type GetRequestsMadeByFidParams = {
-  requesterFid: AbiParameterToPrimitiveType<{"internalType":"uint256","name":"requesterFid","type":"uint256"}>
-};
-
-/**
- * Calls the "getRequestsMadeByFid" function on the contract.
- * @param options - The options for the getRequestsMadeByFid function.
- * @returns The parsed result of the function call.
- * @example
- * ```
- * import { getRequestsMadeByFid } from "TODO";
- *
- * const result = await getRequestsMadeByFid({
- *  requesterFid: ...,
- * });
- *
- * ```
- */
-export async function getRequestsMadeByFid(
-  options: BaseTransactionOptions<GetRequestsMadeByFidParams>
-) {
-  return readContract({
-    contract: options.contract,
-    method: [
-  "0xe0fc7264",
-  [
-    {
-      "internalType": "uint256",
-      "name": "requesterFid",
-      "type": "uint256"
-    }
-  ],
-  [
-    {
-      "components": [
-        {
-          "internalType": "uint256",
-          "name": "id",
-          "type": "uint256"
-        },
-        {
-          "internalType": "address",
-          "name": "requester",
-          "type": "address"
-        },
-        {
-          "internalType": "uint256",
-          "name": "requesterFid",
-          "type": "uint256"
-        },
-        {
-          "internalType": "address",
-          "name": "completer",
-          "type": "address"
-        },
-        {
-          "internalType": "uint256",
-          "name": "completerFid",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "amount",
-          "type": "uint256"
-        },
-        {
-          "internalType": "bool",
-          "name": "isCompleted",
-          "type": "bool"
-        },
-        {
-          "internalType": "bool",
-          "name": "isCancelled",
-          "type": "bool"
-        },
-        {
-          "internalType": "string",
-          "name": "message",
-          "type": "string"
-        },
-        {
-          "internalType": "string",
-          "name": "completionProof",
-          "type": "string"
-        }
-      ],
-      "internalType": "struct FlockIn.Request[]",
-      "name": "",
-      "type": "tuple[]"
-    }
-  ]
-],
-    params: [options.requesterFid]
   });
 };
 
@@ -544,19 +399,14 @@ export async function getRequestsReceivedByAddress(
           "type": "address"
         },
         {
-          "internalType": "uint256",
-          "name": "requesterFid",
-          "type": "uint256"
-        },
-        {
           "internalType": "address",
           "name": "completer",
           "type": "address"
         },
         {
-          "internalType": "uint256",
-          "name": "completerFid",
-          "type": "uint256"
+          "internalType": "address",
+          "name": "token",
+          "type": "address"
         },
         {
           "internalType": "uint256",
@@ -591,106 +441,6 @@ export async function getRequestsReceivedByAddress(
   ]
 ],
     params: [options.completer]
-  });
-};
-
-
-/**
- * Represents the parameters for the "getRequestsReceivedByFid" function.
- */
-export type GetRequestsReceivedByFidParams = {
-  completerFid: AbiParameterToPrimitiveType<{"internalType":"uint256","name":"completerFid","type":"uint256"}>
-};
-
-/**
- * Calls the "getRequestsReceivedByFid" function on the contract.
- * @param options - The options for the getRequestsReceivedByFid function.
- * @returns The parsed result of the function call.
- * @example
- * ```
- * import { getRequestsReceivedByFid } from "TODO";
- *
- * const result = await getRequestsReceivedByFid({
- *  completerFid: ...,
- * });
- *
- * ```
- */
-export async function getRequestsReceivedByFid(
-  options: BaseTransactionOptions<GetRequestsReceivedByFidParams>
-) {
-  return readContract({
-    contract: options.contract,
-    method: [
-  "0x7f7134c9",
-  [
-    {
-      "internalType": "uint256",
-      "name": "completerFid",
-      "type": "uint256"
-    }
-  ],
-  [
-    {
-      "components": [
-        {
-          "internalType": "uint256",
-          "name": "id",
-          "type": "uint256"
-        },
-        {
-          "internalType": "address",
-          "name": "requester",
-          "type": "address"
-        },
-        {
-          "internalType": "uint256",
-          "name": "requesterFid",
-          "type": "uint256"
-        },
-        {
-          "internalType": "address",
-          "name": "completer",
-          "type": "address"
-        },
-        {
-          "internalType": "uint256",
-          "name": "completerFid",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "amount",
-          "type": "uint256"
-        },
-        {
-          "internalType": "bool",
-          "name": "isCompleted",
-          "type": "bool"
-        },
-        {
-          "internalType": "bool",
-          "name": "isCancelled",
-          "type": "bool"
-        },
-        {
-          "internalType": "string",
-          "name": "message",
-          "type": "string"
-        },
-        {
-          "internalType": "string",
-          "name": "completionProof",
-          "type": "string"
-        }
-      ],
-      "internalType": "struct FlockIn.Request[]",
-      "name": "",
-      "type": "tuple[]"
-    }
-  ]
-],
-    params: [options.completerFid]
   });
 };
 
@@ -777,19 +527,14 @@ export async function requests(
       "type": "address"
     },
     {
-      "internalType": "uint256",
-      "name": "requesterFid",
-      "type": "uint256"
-    },
-    {
       "internalType": "address",
       "name": "completer",
       "type": "address"
     },
     {
-      "internalType": "uint256",
-      "name": "completerFid",
-      "type": "uint256"
+      "internalType": "address",
+      "name": "token",
+      "type": "address"
     },
     {
       "internalType": "uint256",
@@ -819,41 +564,6 @@ export async function requests(
   ]
 ],
     params: [options.arg_0]
-  });
-};
-
-
-
-
-/**
- * Calls the "token" function on the contract.
- * @param options - The options for the token function.
- * @returns The parsed result of the function call.
- * @example
- * ```
- * import { token } from "TODO";
- *
- * const result = await token();
- *
- * ```
- */
-export async function token(
-  options: BaseTransactionOptions
-) {
-  return readContract({
-    contract: options.contract,
-    method: [
-  "0xfc0c546a",
-  [],
-  [
-    {
-      "internalType": "contract IERC20",
-      "name": "",
-      "type": "address"
-    }
-  ]
-],
-    params: []
   });
 };
 
@@ -963,9 +673,9 @@ export function completeRequest(
  * Represents the parameters for the "requestFlockIn" function.
  */
 export type RequestFlockInParams = {
-  requesterFid: AbiParameterToPrimitiveType<{"internalType":"uint256","name":"requesterFid","type":"uint256"}>
-completer: AbiParameterToPrimitiveType<{"internalType":"address","name":"completer","type":"address"}>
-completerFid: AbiParameterToPrimitiveType<{"internalType":"uint256","name":"completerFid","type":"uint256"}>
+  completer: AbiParameterToPrimitiveType<{"internalType":"address","name":"completer","type":"address"}>
+token: AbiParameterToPrimitiveType<{"internalType":"address","name":"token","type":"address"}>
+amount: AbiParameterToPrimitiveType<{"internalType":"uint256","name":"amount","type":"uint256"}>
 message: AbiParameterToPrimitiveType<{"internalType":"string","name":"message","type":"string"}>
 };
 
@@ -978,9 +688,9 @@ message: AbiParameterToPrimitiveType<{"internalType":"string","name":"message","
  * import { requestFlockIn } from "TODO";
  *
  * const transaction = requestFlockIn({
- *  requesterFid: ...,
  *  completer: ...,
- *  completerFid: ...,
+ *  token: ...,
+ *  amount: ...,
  *  message: ...,
  * });
  *
@@ -995,21 +705,21 @@ export function requestFlockIn(
   return prepareContractCall({
     contract: options.contract,
     method: [
-  "0x3e7d44d2",
+  "0x723d7f64",
   [
-    {
-      "internalType": "uint256",
-      "name": "requesterFid",
-      "type": "uint256"
-    },
     {
       "internalType": "address",
       "name": "completer",
       "type": "address"
     },
     {
+      "internalType": "address",
+      "name": "token",
+      "type": "address"
+    },
+    {
       "internalType": "uint256",
-      "name": "completerFid",
+      "name": "amount",
       "type": "uint256"
     },
     {
@@ -1020,7 +730,7 @@ export function requestFlockIn(
   ],
   []
 ],
-    params: [options.requesterFid, options.completer, options.completerFid, options.message]
+    params: [options.completer, options.token, options.amount, options.message]
   });
 };
 

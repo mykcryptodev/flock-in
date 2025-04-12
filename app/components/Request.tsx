@@ -1,62 +1,63 @@
-import { getRequestsReceivedByFid } from "@/thirdweb/8453/0x13ab1fe1f087db713c95fec7eb95780f6ec6e177";
-import { useMiniKit } from "@coinbase/onchainkit/minikit";
+import { getRequestsReceivedByAddress } from "@/thirdweb/8453/0x3ff0ef4d24919e03b5a650f2356bd632c59ef9f6";
 import { FC, useEffect, useMemo, useState } from "react";
 import { CancelRequest } from "./CancelRequest";
 import { CompleteRequest } from "./CompleteRequest";
-import { TOKEN_DECIMALS, TOKEN_SYMBOL } from "../constants";
 import { toTokens } from "thirdweb";
 import { Review } from "./Review";
-// Define the user type based on Neynar API response
+import { useAccount } from "wagmi";
+import { isAddressEqual } from "viem";
+import { useReadContract } from "thirdweb/react";
+import { CHAIN } from "../constants";
+import { getContract } from "thirdweb/contract";
+import { createThirdwebClient } from "thirdweb";
+
+const client = createThirdwebClient({
+  clientId: process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID!,
+});
+
 interface NeynarUser {
-  fid: number;
+  address: string;
   username: string;
   display_name: string;
   pfp_url: string;
-  // Add other fields as needed
 }
 
 type Props = {
-  request: Awaited<ReturnType<typeof getRequestsReceivedByFid>>[number];
+  request: Awaited<ReturnType<typeof getRequestsReceivedByAddress>>[number];
   onSuccess: () => void;
 }
 
 export const Request: FC<Props> = ({ request, onSuccess }) => {
-  const { context } = useMiniKit();
+  const { address } = useAccount();
   const [requesterUser, setRequesterUser] = useState<NeynarUser | null>(null);
   const [completerUser, setCompleterUser] = useState<NeynarUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const requestCanBeCancelledByCurrentUser = useMemo(() => {
-    const currentUserIsCompleter = context?.user.fid === Number(request.completerFid);
+    const currentUserIsCompleter = isAddressEqual(address ?? '', request.completer);
     const requestIsNotCompleted = !request.isCompleted;
     const requestIsNotCancelled = !request.isCancelled;
     return currentUserIsCompleter && requestIsNotCompleted && requestIsNotCancelled;
-  }, [request.completerFid, context?.user.fid, request.isCompleted, request.isCancelled]);
+  }, [request.completer, address, request.isCompleted, request.isCancelled]);
 
   const requestCanBeCompletedByCurrentUser = useMemo(() => {
-    const currentUserIsRequester = context?.user.fid === Number(request.requesterFid);
+    const currentUserIsRequester = isAddressEqual(address ?? '', request.requester);
     const requestIsNotCompleted = !request.isCompleted;
     const requestIsNotCancelled = !request.isCancelled;
-    console.log({
-      request,
-      currentUserIsRequester,
-      requestIsNotCompleted,
-      requestIsNotCancelled,
-    })
     return currentUserIsRequester && requestIsNotCompleted && requestIsNotCancelled;
-  }, [context?.user.fid, request]);
+  }, [address, request]);
 
   useEffect(() => {
     const fetchUsers = async () => {
       try {
         setLoading(true);
         
-        // Create a comma-separated string of FIDs
-        const fids = `${Number(request.requesterFid)},${Number(request.completerFid)}`;
+        // Create a comma-separated string of addresses
+        const addresses = `${request.requester},${request.completer}`;
         
         // Fetch user data from our API endpoint
-        const response = await fetch(`/api/users/get?fids=${fids}`);
+        const response = await fetch(`/api/users/get?addresses=${addresses}`);
         
         if (!response.ok) {
           throw new Error('Failed to fetch user data');
@@ -66,8 +67,8 @@ export const Request: FC<Props> = ({ request, onSuccess }) => {
         
         // Find the requester and completer in the response
         const users = data.users || [];
-        const requester = users.find((user: NeynarUser) => user.fid === Number(request.requesterFid));
-        const completer = users.find((user: NeynarUser) => user.fid === Number(request.completerFid));
+        const requester = users.find((user: NeynarUser) => user.address === request.requester);
+        const completer = users.find((user: NeynarUser) => user.address === request.completer);
         
         setRequesterUser(requester || null);
         setCompleterUser(completer || null);
@@ -80,7 +81,21 @@ export const Request: FC<Props> = ({ request, onSuccess }) => {
     };
 
     fetchUsers();
-  }, [request.requesterFid, request.completerFid]);
+  }, [request.requester, request.completer]);
+
+  const tokenContract = getContract({
+    client,
+    address: request.token,
+    chain: CHAIN,
+  });
+  const { data: decimals } = useReadContract({
+    contract: tokenContract,
+    method: "function decimals() public view returns (uint8)",
+  });
+  const { data: symbol } = useReadContract({
+    contract: tokenContract,
+    method: "function symbol() public view returns (string)",
+  });
 
   if (loading) {
     return <div>Loading user information...</div>;
@@ -91,7 +106,7 @@ export const Request: FC<Props> = ({ request, onSuccess }) => {
   }
 
   // Convert bigint to number for display
-  const amountInToken = toTokens(request.amount, TOKEN_DECIMALS);
+  const amountInToken = toTokens(request.amount, decimals ?? 18);
 
   return (
     <div className="border rounded-lg p-4 mb-4 shadow-sm">
@@ -108,10 +123,10 @@ export const Request: FC<Props> = ({ request, onSuccess }) => {
           )}
           <div>
             <p className="font-medium">
-              {requesterUser?.display_name || requesterUser?.username || `User ${request.requesterFid}`}
+              {requesterUser?.display_name || requesterUser?.username || `User ${request.requester}`}
             </p>
             <p className="text-sm text-gray-500">
-              Requested by {requesterUser?.username || `@user${request.requesterFid}`}
+              Requested by {requesterUser?.username || `@user${request.requester}`}
             </p>
           </div>
         </div>
@@ -128,10 +143,10 @@ export const Request: FC<Props> = ({ request, onSuccess }) => {
           )}
           <div>
             <p className="font-medium">
-              {completerUser?.display_name || completerUser?.username || `User ${request.completerFid}`}
+              {completerUser?.display_name || completerUser?.username || `User ${request.completer}`}
             </p>
             <p className="text-sm text-gray-500">
-              Requested for {completerUser?.username || `@user${request.completerFid}`}
+              Requested for {completerUser?.username || `@user${request.completer}`}
             </p>
           </div>
         </div>
@@ -143,14 +158,14 @@ export const Request: FC<Props> = ({ request, onSuccess }) => {
       
       <div className="mt-3 flex justify-between items-center">
         <span className="text-sm font-medium">
-          Amount: {amountInToken} ${TOKEN_SYMBOL}
+          Amount: {amountInToken} {symbol ?? ''}
         </span>
         
         <div className="flex space-x-2">
           {requestCanBeCompletedByCurrentUser && (
             <CompleteRequest 
               requestId={request.id.toString()} 
-              requesterFid={Number(request.requesterFid)}
+              requester={request.requester}
               onSuccess={onSuccess} 
             />
           )}
@@ -174,8 +189,7 @@ export const Request: FC<Props> = ({ request, onSuccess }) => {
       <div className="mt-1">
         <Review 
           requestId={request.id.toString()} 
-          requesterFid={Number(request.requesterFid)}
-          completerFid={Number(request.completerFid)}
+          requester={request.requester}
           completer={request.completer}
         />
       </div>

@@ -1,4 +1,4 @@
-import { completeRequest } from "@/thirdweb/8453/0x13ab1fe1f087db713c95fec7eb95780f6ec6e177";
+import { completeRequest } from "@/thirdweb/8453/0x3ff0ef4d24919e03b5a650f2356bd632c59ef9f6";
 import { Transaction } from "@coinbase/onchainkit/transaction";
 import { TransactionButton } from "@coinbase/onchainkit/transaction";
 import { FC, useCallback } from "react";
@@ -12,11 +12,11 @@ const client = createThirdwebClient({
 
 type Props = {
   requestId: string;
-  requesterFid: number;
+  requester: string;
   onSuccess: () => void;
 }
 
-export const CompleteRequest: FC<Props> = ({ requestId, requesterFid, onSuccess }) => {
+export const CompleteRequest: FC<Props> = ({ requestId, requester, onSuccess }) => {
   const { context } = useMiniKit();
 
   const sendCompletionNotification = useCallback(async () => {
@@ -31,7 +31,7 @@ export const CompleteRequest: FC<Props> = ({ requestId, requesterFid, onSuccess 
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          requesterFid,
+          requester,
           completerUsername: context.user.username,
         }),
       });
@@ -42,7 +42,7 @@ export const CompleteRequest: FC<Props> = ({ requestId, requesterFid, onSuccess 
     } catch (error) {
       console.error('Error sending completion notification:', error);
     }
-  }, [context, requesterFid]);
+  }, [context, requester]);
 
   const getCalls = async () => {
     const tx = completeRequest({

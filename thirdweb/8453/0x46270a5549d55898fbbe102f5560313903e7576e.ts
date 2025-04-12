@@ -141,19 +141,9 @@ export async function getReview(
           "type": "address"
         },
         {
-          "internalType": "uint256",
-          "name": "reviewerFid",
-          "type": "uint256"
-        },
-        {
           "internalType": "address",
           "name": "reviewee",
           "type": "address"
-        },
-        {
-          "internalType": "uint256",
-          "name": "revieweeFid",
-          "type": "uint256"
         },
         {
           "internalType": "uint256",
@@ -246,19 +236,9 @@ export async function getReviewByRequestId(
           "type": "address"
         },
         {
-          "internalType": "uint256",
-          "name": "reviewerFid",
-          "type": "uint256"
-        },
-        {
           "internalType": "address",
           "name": "reviewee",
           "type": "address"
-        },
-        {
-          "internalType": "uint256",
-          "name": "revieweeFid",
-          "type": "uint256"
         },
         {
           "internalType": "uint256",
@@ -293,6 +273,54 @@ export async function getReviewByRequestId(
   ]
 ],
     params: [options.requestId]
+  });
+};
+
+
+/**
+ * Represents the parameters for the "getReviewsByReviewee" function.
+ */
+export type GetReviewsByRevieweeParams = {
+  reviewee: AbiParameterToPrimitiveType<{"internalType":"address","name":"reviewee","type":"address"}>
+};
+
+/**
+ * Calls the "getReviewsByReviewee" function on the contract.
+ * @param options - The options for the getReviewsByReviewee function.
+ * @returns The parsed result of the function call.
+ * @example
+ * ```
+ * import { getReviewsByReviewee } from "TODO";
+ *
+ * const result = await getReviewsByReviewee({
+ *  reviewee: ...,
+ * });
+ *
+ * ```
+ */
+export async function getReviewsByReviewee(
+  options: BaseTransactionOptions<GetReviewsByRevieweeParams>
+) {
+  return readContract({
+    contract: options.contract,
+    method: [
+  "0x95aec171",
+  [
+    {
+      "internalType": "address",
+      "name": "reviewee",
+      "type": "address"
+    }
+  ],
+  [
+    {
+      "internalType": "uint256[]",
+      "name": "",
+      "type": "uint256[]"
+    }
+  ]
+],
+    params: [options.reviewee]
   });
 };
 
@@ -480,19 +508,9 @@ export async function reviews(
       "type": "address"
     },
     {
-      "internalType": "uint256",
-      "name": "reviewerFid",
-      "type": "uint256"
-    },
-    {
       "internalType": "address",
       "name": "reviewee",
       "type": "address"
-    },
-    {
-      "internalType": "uint256",
-      "name": "revieweeFid",
-      "type": "uint256"
     },
     {
       "internalType": "uint256",
@@ -527,6 +545,61 @@ export async function reviews(
 
 
 /**
+ * Represents the parameters for the "reviewsByReviewee" function.
+ */
+export type ReviewsByRevieweeParams = {
+  arg_0: AbiParameterToPrimitiveType<{"internalType":"address","name":"","type":"address"}>
+arg_1: AbiParameterToPrimitiveType<{"internalType":"uint256","name":"","type":"uint256"}>
+};
+
+/**
+ * Calls the "reviewsByReviewee" function on the contract.
+ * @param options - The options for the reviewsByReviewee function.
+ * @returns The parsed result of the function call.
+ * @example
+ * ```
+ * import { reviewsByReviewee } from "TODO";
+ *
+ * const result = await reviewsByReviewee({
+ *  arg_0: ...,
+ *  arg_1: ...,
+ * });
+ *
+ * ```
+ */
+export async function reviewsByReviewee(
+  options: BaseTransactionOptions<ReviewsByRevieweeParams>
+) {
+  return readContract({
+    contract: options.contract,
+    method: [
+  "0xd2759e5c",
+  [
+    {
+      "internalType": "address",
+      "name": "",
+      "type": "address"
+    },
+    {
+      "internalType": "uint256",
+      "name": "",
+      "type": "uint256"
+    }
+  ],
+  [
+    {
+      "internalType": "uint256",
+      "name": "",
+      "type": "uint256"
+    }
+  ]
+],
+    params: [options.arg_0, options.arg_1]
+  });
+};
+
+
+/**
 * Contract write functions
 */
 
@@ -535,9 +608,7 @@ export async function reviews(
  */
 export type CreateReviewParams = {
   requestId: AbiParameterToPrimitiveType<{"internalType":"uint256","name":"requestId","type":"uint256"}>
-reviewerFid: AbiParameterToPrimitiveType<{"internalType":"uint256","name":"reviewerFid","type":"uint256"}>
 reviewee: AbiParameterToPrimitiveType<{"internalType":"address","name":"reviewee","type":"address"}>
-revieweeFid: AbiParameterToPrimitiveType<{"internalType":"uint256","name":"revieweeFid","type":"uint256"}>
 rating: AbiParameterToPrimitiveType<{"internalType":"uint256","name":"rating","type":"uint256"}>
 comment: AbiParameterToPrimitiveType<{"internalType":"string","name":"comment","type":"string"}>
 metadata: AbiParameterToPrimitiveType<{"internalType":"bytes","name":"metadata","type":"bytes"}>
@@ -553,9 +624,7 @@ metadata: AbiParameterToPrimitiveType<{"internalType":"bytes","name":"metadata",
  *
  * const transaction = createReview({
  *  requestId: ...,
- *  reviewerFid: ...,
  *  reviewee: ...,
- *  revieweeFid: ...,
  *  rating: ...,
  *  comment: ...,
  *  metadata: ...,
@@ -572,7 +641,7 @@ export function createReview(
   return prepareContractCall({
     contract: options.contract,
     method: [
-  "0x37e30046",
+  "0xeda0684d",
   [
     {
       "internalType": "uint256",
@@ -580,19 +649,9 @@ export function createReview(
       "type": "uint256"
     },
     {
-      "internalType": "uint256",
-      "name": "reviewerFid",
-      "type": "uint256"
-    },
-    {
       "internalType": "address",
       "name": "reviewee",
       "type": "address"
-    },
-    {
-      "internalType": "uint256",
-      "name": "revieweeFid",
-      "type": "uint256"
     },
     {
       "internalType": "uint256",
@@ -612,7 +671,7 @@ export function createReview(
   ],
   []
 ],
-    params: [options.requestId, options.reviewerFid, options.reviewee, options.revieweeFid, options.rating, options.comment, options.metadata]
+    params: [options.requestId, options.reviewee, options.rating, options.comment, options.metadata]
   });
 };
 
