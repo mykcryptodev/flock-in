@@ -31,6 +31,9 @@ contract FlockInReviews {
     // Mapping from reviewId to requestId
     mapping(uint256 => uint256) public requestIdByReviewId;
 
+    // Mapping from revieweeFid to reviewIds
+    mapping(uint256 => uint256[]) public reviewsByRevieweeFid;
+
     // Reference to the FlockIn contract
     FlockIn public immutable flockIn;
 
@@ -91,7 +94,7 @@ contract FlockInReviews {
         reviews[reviewId] = newReview;
         reviewIdByRequestId[requestId] = reviewId;
         requestIdByReviewId[reviewId] = requestId;
-
+        reviewsByRevieweeFid[revieweeFid].push(reviewId);
         emit ReviewCreated(reviewId, requestId, msg.sender, reviewee, rating, comment, !request.isCompleted);
     }
 
@@ -120,5 +123,12 @@ contract FlockInReviews {
         require(review.reviewee == msg.sender, "Only the reviewee can leave a comment");
         
         review.revieweeComment = comment;
+    }
+
+    /// @notice Gets all reviews for a given revieweeFid
+    /// @param revieweeFid The FID of the reviewee to get reviews for
+    /// @return An array of review IDs
+    function getReviewsByRevieweeFid(uint256 revieweeFid) external view returns (uint256[] memory) {
+        return reviewsByRevieweeFid[revieweeFid];
     }
 } 

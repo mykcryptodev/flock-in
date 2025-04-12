@@ -5,6 +5,7 @@ import { FC, useEffect, useState } from "react";
 import { getContract } from "thirdweb";
 import { createThirdwebClient } from "thirdweb";
 import WriteReview from "./WriteReview";
+import { useMiniKit } from "@coinbase/onchainkit/minikit";
 
 const client = createThirdwebClient({
   clientId: process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID!,
@@ -20,6 +21,7 @@ type Props = {
 export const Review: FC<Props> = ({ requestId, requesterFid, completerFid, completer }) => {
   const [isReviewLoading, setIsReviewLoading] = useState(true);
   const [review, setReview] = useState<Awaited<ReturnType<typeof getReviewByRequestId>> | null>(null);
+  const { context } = useMiniKit();
 
   useEffect(() => {
     const fetchReview = async () => {
@@ -47,8 +49,12 @@ export const Review: FC<Props> = ({ requestId, requesterFid, completerFid, compl
     return <div>Loading...</div>;
   }
 
-  if (!review?.id) {
+  if (!review?.id && context?.user.fid === requesterFid) {
     return <WriteReview requestId={requestId} requesterFid={requesterFid} completerFid={completerFid} completer={completer} />;
+  }
+
+  if (!review?.id) {
+    return null;
   }
 
   return (

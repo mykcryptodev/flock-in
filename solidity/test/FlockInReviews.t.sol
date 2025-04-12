@@ -380,4 +380,64 @@ contract FlockInReviewsTest is Test {
         flockInReviews.leaveRevieweeComment(999, "This review doesn't exist!");
         vm.stopPrank();
     }
+
+    function test_GetReviewsByRevieweeFid() public {
+      // Create and complete multiple requests for Bob
+      vm.startPrank(alice);
+      token.approve(address(flockIn), type(uint256).max);
+      flockIn.requestFlockIn(aliceFid, bob, bobFid, "First request");
+      vm.stopPrank();
+
+      vm.startPrank(bob);
+      flockIn.completeRequest(0, "");
+      vm.stopPrank();
+
+      vm.startPrank(alice);
+      flockIn.requestFlockIn(aliceFid, bob, bobFid, "Second request");
+      vm.stopPrank();
+
+      vm.startPrank(bob);
+      flockIn.completeRequest(1, "");
+      vm.stopPrank();
+
+      // Create reviews for both requests
+      vm.startPrank(alice);
+      flockInReviews.createReview(
+          0,
+          aliceFid,
+          bob,
+          bobFid,
+          5,
+          "Great first service!",
+          ""
+      );
+
+      flockInReviews.createReview(
+          1,
+          aliceFid,
+          bob,
+          bobFid,
+          4,
+          "Good second service!",
+          ""
+      );
+      vm.stopPrank();
+
+      // Get all reviews for Bob
+      uint256[] memory bobReviews = flockInReviews.getReviewsByRevieweeFid(bobFid);
+      
+      // Verify we got both reviews
+      assertEq(bobReviews.length, 2);
+      
+      // Verify the review IDs are correct
+      assertEq(bobReviews[0], 1);
+      assertEq(bobReviews[1], 2);
+
+      // Verify the reviews are for Bob
+      FlockInReviews.Review memory review1 = flockInReviews.getReview(bobReviews[0]);
+      FlockInReviews.Review memory review2 = flockInReviews.getReview(bobReviews[1]);
+      
+      assertEq(review1.revieweeFid, bobFid);
+      assertEq(review2.revieweeFid, bobFid);
+    }  
 } 
