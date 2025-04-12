@@ -36,16 +36,14 @@ export default function App() {
     }
   }, [context, connect, address]);
 
-
-
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-[#E5E5E5] text-black snake-dark">
+    <div className="flex flex-col h-screen bg-[#E5E5E5] text-black snake-dark">
       <div className="w-full max-w-[520px] mx-auto flex flex-col h-full">
-        <header>
+        <header className="sticky top-0 z-10 bg-[#E5E5E5]">
           <Nav activeTab={activeTab} onTabSelect={setActiveTab} />
         </header>
 
-        <main className="flex-1 overflow-y-auto px-4 pb-20">
+        <main className="flex-1 px-4 pb-20 overflow-y-auto mt-8">
           <div className="flex flex-col gap-4">
             {activeTab === "create-request" && (
               <UserSearch />          
@@ -62,7 +60,7 @@ export default function App() {
           </div>
         </main>
 
-        <footer className="fixed bottom-0 left-0 right-0 flex items-center justify-center p-4 bg-[#E5E5E5]">
+        <footer className="sticky bottom-0 left-0 right-0 flex items-center justify-center p-4 bg-[#E5E5E5]">
           <button
             type="button"
             className="px-2 py-1 flex justify-start rounded-2xl font-semibold opacity-40 border border-black text-xs"
