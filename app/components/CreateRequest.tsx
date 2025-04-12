@@ -158,6 +158,7 @@ export const CreateRequest: FC<Props> = ({ onSuccess }) => {
   };
 
   const handleSuggestedPaymentAmountClick = async (amount: bigint, token: string) => {
+    console.log("clicked", amount, token);
     const tokenContract = getContract({
       address: token,
       client,
@@ -175,7 +176,8 @@ export const CreateRequest: FC<Props> = ({ onSuccess }) => {
       symbol: currencyMetadata.symbol,
     });
     setAmount(amount);
-  };
+    setAmountInput(toTokens(amount, currencyMetadata.decimals).toString());
+  }; 
 
   return (
     <div>
@@ -198,7 +200,7 @@ export const CreateRequest: FC<Props> = ({ onSuccess }) => {
         />
       )}
       <div className="my-2">
-        <TokenPicker onTokenChange={setToken} />
+        <TokenPicker selectedToken={token} onTokenChange={setToken} />
       </div>
       {token && (
         <input 

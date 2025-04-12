@@ -74,7 +74,7 @@ export const SuggestedPaymentAmountsList = ({ address, onRemove, showTitle, onCl
       {showTitle && <h2 className="text-sm">Suggested Payment Amounts</h2>}
       {userPreferredPaymentAmounts.map((amount, index) => (
         <div className="flex w-full justify-between items-center gap-2 bg-white p-3 rounded-md" key={`${amount.token}-${index}`}>
-          <div onClick={() => onClick?.(amount.amount, amount.token)} className="flex gap-2 items-center">
+          <div onClick={() => onClick?.(amount.amount, amount.token)} className="flex gap-2 items-center w-full">
             <TokenProvider address={amount.token} client={client} chain={CHAIN}>
               <TokenIcon className="w-4 h-4" />
               <div className="flex flex-col gap-1">

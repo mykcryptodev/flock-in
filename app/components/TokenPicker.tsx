@@ -1,16 +1,15 @@
 import { getTokens } from "@coinbase/onchainkit/api";
 import { Token, TokenSearch } from "@coinbase/onchainkit/token";
 import { useCallback, useState } from "react";
-import { createThirdwebClient } from "thirdweb";
 import { isAddress, shortenAddress } from "thirdweb/utils";
 
 
 type Props = {
-  onTokenChange: (token: Token) => void;
+  onTokenChange: (token: Token | null) => void;
+  selectedToken: Token | null;
 }
 
-export const TokenPicker = ({ onTokenChange }: Props) => {
-  const [selectedToken, setSelectedToken] = useState<Token | null>(null);
+export const TokenPicker = ({ onTokenChange, selectedToken }: Props) => {
   const [tokens, setTokens] = useState<Token[]>([]);
   const [tokensIsLoading, setTokensIsLoading] = useState(false);
 
@@ -34,7 +33,6 @@ export const TokenPicker = ({ onTokenChange }: Props) => {
   }, []);
 
   const handleTokenClick = useCallback((token: Token) => {
-    setSelectedToken(token);
     onTokenChange(token);
     setTokens([]);
   }, [onTokenChange]);
@@ -44,7 +42,7 @@ export const TokenPicker = ({ onTokenChange }: Props) => {
       <div 
         key={selectedToken.address}
         className="flex items-center justify-between p-3 bg-white my-1 hover:bg-gray-50 rounded-md cursor-pointer"
-        onClick={() => setSelectedToken(null)}
+        onClick={() => onTokenChange(null)}
       >
         <div className="flex items-center space-x-3">
           {selectedToken.image && (

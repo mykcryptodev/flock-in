@@ -1,5 +1,4 @@
 import { useAccount } from "wagmi";
-import { SuggestedPaymentAmountsList } from "./List";
 import { encode, getContract, toUnits } from "thirdweb";
 import { FC, useCallback, useState } from "react";
 import { addSuggestedAmount } from "@/thirdweb/8453/0xf0af2c550b51f3e4fe1b7dcfd4ac8a7093f54b94";
@@ -45,7 +44,7 @@ export const AddSuggestedPaymentAmount: FC<Props> = ({ onSuccess }) => {
   return (
     <div>
       <h1>Add Suggested Payment Amount</h1>
-      <TokenPicker onTokenChange={setToken} />
+      <TokenPicker selectedToken={token} onTokenChange={setToken} />
       <input 
         type="number" 
         value={amount} 
