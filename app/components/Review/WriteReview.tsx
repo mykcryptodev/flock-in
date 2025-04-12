@@ -1,4 +1,4 @@
-import { Transaction } from "@coinbase/onchainkit/transaction";
+import { Transaction, TransactionToastLabel, TransactionToast, TransactionToastIcon, TransactionToastAction } from "@coinbase/onchainkit/transaction";
 import { useState } from "react";
 import { TransactionButton } from "@coinbase/onchainkit/transaction";
 import { createReview } from "@/thirdweb/8453/0x46270a5549d55898fbbe102f5560313903e7576e";
@@ -112,6 +112,11 @@ export default function WriteReview({ requestId, completer }: Props) {
                   handleSubmit();
                 }}
               >
+                <TransactionToast>
+                  <TransactionToastIcon />
+                  <TransactionToastLabel />
+                  <TransactionToastAction />
+                </TransactionToast>
                 <TransactionButton 
                   disabled={!rating || !review || !address}
                   text="Submit"

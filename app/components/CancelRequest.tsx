@@ -3,7 +3,7 @@ import { FC } from "react";
 import { encode, getContract } from "thirdweb";
 import { createThirdwebClient } from "thirdweb";
 import { CHAIN, CONTRACT } from "../constants";
-import { Transaction, TransactionButton } from "@coinbase/onchainkit/transaction";
+import { Transaction, TransactionButton, TransactionToast, TransactionToastAction, TransactionToastIcon, TransactionToastLabel } from "@coinbase/onchainkit/transaction";
 
 const client = createThirdwebClient({
   clientId: process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID!,
@@ -36,6 +36,11 @@ export const CancelRequest: FC<Props> = ({ requestId, onSuccess }) => {
       calls={getCalls}
       onSuccess={onSuccess}
     >
+      <TransactionToast>
+        <TransactionToastIcon />
+        <TransactionToastLabel />
+        <TransactionToastAction />
+      </TransactionToast>
       <TransactionButton className="bg-red-500 text-white p-2 rounded-md" text="Cancel" />
     </Transaction>
   )

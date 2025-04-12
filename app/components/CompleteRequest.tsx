@@ -1,5 +1,5 @@
 import { completeRequest } from "@/thirdweb/8453/0x3ff0ef4d24919e03b5a650f2356bd632c59ef9f6";
-import { Transaction } from "@coinbase/onchainkit/transaction";
+import { Transaction, TransactionToastAction, TransactionToastLabel, TransactionToast, TransactionToastIcon } from "@coinbase/onchainkit/transaction";
 import { TransactionButton } from "@coinbase/onchainkit/transaction";
 import { FC, useCallback } from "react";
 import { createThirdwebClient, encode, getContract } from "thirdweb";
@@ -72,6 +72,11 @@ export const CompleteRequest: FC<Props> = ({ requestId, requester, onSuccess }) 
         onSuccess();
       }}
     >
+      <TransactionToast>
+        <TransactionToastIcon />
+        <TransactionToastLabel />
+        <TransactionToastAction />
+      </TransactionToast>
       <TransactionButton className="bg-green-500 text-white p-2 rounded-md" text="Complete" />
     </Transaction>
   )

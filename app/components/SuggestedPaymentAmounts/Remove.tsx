@@ -1,5 +1,5 @@
 import { addSuggestedAmount, removeSuggestedAmount } from "@/thirdweb/8453/0xf0af2c550b51f3e4fe1b7dcfd4ac8a7093f54b94";
-import { Transaction, TransactionButton } from "@coinbase/onchainkit/transaction";
+import { Transaction, TransactionButton, TransactionToastAction, TransactionToast, TransactionToastIcon, TransactionToastLabel } from "@coinbase/onchainkit/transaction";
 import { FC, useCallback } from "react";
 import { getContract } from "thirdweb/contract";
 import { encode } from "thirdweb/transaction";
@@ -39,6 +39,11 @@ export const Remove: FC<Props> = ({ token, onRemove }) => {
       calls={getRemoveCalls}
       onSuccess={onRemove}
     >
+      <TransactionToast>
+        <TransactionToastIcon />
+        <TransactionToastLabel />
+        <TransactionToastAction />
+      </TransactionToast>
       <TransactionButton className="text-red-500 p-2 rounded-md w-fit bg-transparent" text={"x"} />
     </Transaction>
   )

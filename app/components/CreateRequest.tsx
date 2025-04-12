@@ -1,17 +1,16 @@
-import { Transaction, TransactionButton } from "@coinbase/onchainkit/transaction";
-import { FC, useCallback, useEffect, useMemo, useState } from "react";
+import { Transaction, TransactionButton, TransactionToast, TransactionToastAction, TransactionToastIcon, TransactionToastLabel } from "@coinbase/onchainkit/transaction";
+import { FC, useCallback, useMemo, useState } from "react";
 import { requestFlockIn } from "@/thirdweb/8453/0x3ff0ef4d24919e03b5a650f2356bd632c59ef9f6";
 import { useUserStore } from "../store/userStore";
 import { createThirdwebClient, encode, getContract, toTokens, ZERO_ADDRESS } from "thirdweb";
 import { CHAIN, CONTRACT, USDC } from "../constants";
-import { allowance, approve, balanceOf, getCurrencyMetadata } from "thirdweb/extensions/erc20";
+import { approve, getCurrencyMetadata } from "thirdweb/extensions/erc20";
 import { useAccount } from "wagmi";
 import { useMiniKit } from "@coinbase/onchainkit/minikit";
 import { TokenPicker } from "./TokenPicker";
 import { Token } from "@coinbase/onchainkit/token";
 import { isAddress, parseUnits } from "viem";
 import { SuggestedPaymentAmountsList } from "./SuggestedPaymentAmounts/List";
-import { toast } from "react-toastify";
 import { useReadContract } from "thirdweb/react";
 
 const MAX_CHARS = 300;
@@ -43,7 +42,7 @@ export const CreateRequest: FC<Props> = ({ onSuccess }) => {
     return selectedUser?.verified_addresses?.primary?.eth_address ?? selectedUser?.custody_address;
   }, [selectedUser]);
 
-  const { data: allowance } = useReadContract({
+  const { data: allowance, refetch: refetchAllowance } = useReadContract({
     contract: getContract({
       address: token?.address ?? USDC,
       client,
@@ -53,7 +52,7 @@ export const CreateRequest: FC<Props> = ({ onSuccess }) => {
     params: [address ?? ZERO_ADDRESS, CONTRACT],
   });
 
-  const { data: balance } = useReadContract({
+  const { data: balance, refetch: refetchBalance } = useReadContract({
     contract: getContract({
       address: token?.address ?? USDC,
       client,
@@ -64,11 +63,11 @@ export const CreateRequest: FC<Props> = ({ onSuccess }) => {
   });
 
   const approvalRequired = useMemo(() => {
-    return allowance && allowance < amount;
+    return allowance !== undefined && allowance < amount;
   }, [allowance, amount]);
 
   const getApprovalCalls = useCallback(async () => {
-    if (!address || !token) {
+    if (!address || !token || !amount) {
       return [];
     }
     const approvalTx = approve({
@@ -87,7 +86,7 @@ export const CreateRequest: FC<Props> = ({ onSuccess }) => {
         data: encodedApprovalTx,
       },
     ];
-  }, [address, token]);
+  }, [address, token, amount]);
 
   const getTxCalls = useCallback(async () => {
     if (!completerAddress || !token || !amount) {
@@ -102,7 +101,7 @@ export const CreateRequest: FC<Props> = ({ onSuccess }) => {
       completer: completerAddress,
       message: videoDescription,
       token: token.address,
-      amount: amount,
+      amount,
     });
     const encodedTx = await encode(tx);
     return [
@@ -111,7 +110,7 @@ export const CreateRequest: FC<Props> = ({ onSuccess }) => {
         data: encodedTx,
       },
     ];
-  }, [selectedUser, videoDescription]);
+  }, [selectedUser, videoDescription, completerAddress, token, amount]);
 
   // Function to send notification to the completer
   const sendNotification = useCallback(async () => {
@@ -138,15 +137,16 @@ export const CreateRequest: FC<Props> = ({ onSuccess }) => {
     } catch (error) {
       console.error('Error sending notification:', error);
     }
-  }, [selectedUser, context, videoDescription]);
+  }, [completerAddress, context?.user.username, videoDescription]);
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!token) return;
     const value = e.target.value;
     if (value === '') {
       setAmount(BigInt(0));
       setAmountInput("");
     } else {
-      setAmount(parseUnits(value, token?.decimals ?? 18));
+      setAmount(parseUnits(value, token.decimals));
       setAmountInput(value);
     }
   };
@@ -171,13 +171,16 @@ export const CreateRequest: FC<Props> = ({ onSuccess }) => {
     });
     setAmount(amount);
     setAmountInput(toTokens(amount, currencyMetadata.decimals).toString());
-  }; 
-
-  const cleanUp = () => {
-    setAmount(BigInt(0));
-    setAmountInput("");
-    setToken(null);
   };
+
+  const isValidRequest = useMemo(() => {
+    const amountIsGreaterThanZero = amount > BigInt(0);
+    const tokenIsSet = !!token;
+    const completerAddressIsSet = !!completerAddress;
+    const addressIsSet = !!address;
+    const allowanceIsGreaterThanAmount = allowance && allowance >= amount;
+    return amountIsGreaterThanZero && tokenIsSet && completerAddressIsSet && addressIsSet && allowanceIsGreaterThanAmount;
+  }, [amount, token, completerAddress, address, allowance]);
 
   return (
     <div>
@@ -217,20 +220,15 @@ export const CreateRequest: FC<Props> = ({ onSuccess }) => {
       {approvalRequired && (
         <Transaction
           calls={getApprovalCalls}
-          onStatus={(status) => {
-            if (status.statusName === "transactionPending") {
-              toast.loading("Approving...");
-            }
-          }}
           onSuccess={() => {
-            toast.dismiss();
-            toast.success("Approval successful");
-          }}
-          onError={(error) => {
-            toast.dismiss();
-            toast.error(`Approval failed: ${error.message}`);
+            refetchAllowance();
           }}
         >
+          <TransactionToast>
+            <TransactionToastIcon />
+            <TransactionToastLabel />
+            <TransactionToastAction />
+          </TransactionToast>
           <TransactionButton className="bg-blue-500 text-white p-2 rounded-md mt-4" text="Approve" />
         </Transaction>
       )}
@@ -238,29 +236,16 @@ export const CreateRequest: FC<Props> = ({ onSuccess }) => {
       {!approvalRequired && (
         <Transaction
           calls={getTxCalls}
-          onStatus={(status) => {
-            if (status.statusName === "transactionPending") {
-              toast.loading("Requesting...");
-            }
-          }}
-          onSuccess={() => {
-            // Send notification after successful request creation
-            sendNotification();
-            toast.dismiss();
-            toast.success("Your request has been created!");
-            cleanUp();
-            onSuccess();
-          }}
-          onError={(error) => {
-            toast.dismiss();
-            toast.error(`Request failed: ${error.message}`);
-            cleanUp();
-          }}
         >
+          <TransactionToast>
+            <TransactionToastIcon />
+            <TransactionToastLabel />
+            <TransactionToastAction />
+          </TransactionToast>
           <TransactionButton
             className="bg-blue-500 text-white p-2 rounded-md mt-4"
             text="Request Video"
-            disabled={!selectedUser || !token || !amount}
+            disabled={!isValidRequest}
           />
         </Transaction>
       )}
