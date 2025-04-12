@@ -32,6 +32,7 @@ export const Request: FC<Props> = ({ request, onSuccess }) => {
   const [requesterUser, setRequesterUser] = useState<NeynarUser | null>(null);
   const [completerUser, setCompleterUser] = useState<NeynarUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const [users, setUsers] = useState<NeynarUser[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   const requestCanBeCancelledByCurrentUser = useMemo(() => {
@@ -57,7 +58,7 @@ export const Request: FC<Props> = ({ request, onSuccess }) => {
         const addresses = `${request.requester},${request.completer}`;
         
         // Fetch user data from our API endpoint
-        const response = await fetch(`/api/users/get?addresses=${addresses}`);
+        const response = await fetch(`/api/users/get-by-address?addresses=${addresses}`);
         
         if (!response.ok) {
           throw new Error('Failed to fetch user data');
@@ -67,8 +68,9 @@ export const Request: FC<Props> = ({ request, onSuccess }) => {
         
         // Find the requester and completer in the response
         const users = data.users || [];
-        const requester = users.find((user: NeynarUser) => user.address === request.requester);
-        const completer = users.find((user: NeynarUser) => user.address === request.completer);
+        setUsers(users);
+        const requester = users.find((user: NeynarUser) => isAddressEqual(user.address, request.requester));
+        const completer = users.find((user: NeynarUser) => isAddressEqual(user.address, request.completer));
         
         setRequesterUser(requester || null);
         setCompleterUser(completer || null);
