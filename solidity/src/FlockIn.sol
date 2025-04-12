@@ -22,6 +22,7 @@ contract FlockIn is ReentrancyGuard {
         bool isCompleted;
         bool isCancelled;
         string message;
+        string completionProof;
     }
 
     // Main storage for requests
@@ -44,8 +45,9 @@ contract FlockIn is ReentrancyGuard {
 
     // Events remain the same
     event RequestCreated(uint256 indexed requestId, address indexed requester, address indexed completer, uint256 amount, string message);
-    event RequestCompleted(uint256 indexed requestId, address indexed completer);
+    event RequestCompleted(uint256 indexed requestId, address indexed completer, string completionProof);
     event RequestCancelled(uint256 indexed requestId, address indexed requester);
+    event CompletionProofUpdated(uint256 indexed requestId, address indexed completer, string newProof);
 
     constructor(address _token) {
         require(_token != address(0), "Invalid token address");
@@ -72,7 +74,8 @@ contract FlockIn is ReentrancyGuard {
             amount: REQUEST_AMOUNT,
             isCompleted: false,
             isCancelled: false,
-            message: message
+            message: message,
+            completionProof: ""
         });
         
         requests[requestId] = newRequest;
@@ -87,16 +90,17 @@ contract FlockIn is ReentrancyGuard {
     }
 
     /// @notice Completes a request and transfers the funds to the completer
-    function completeRequest(uint256 requestId) external nonReentrant {
+    function completeRequest(uint256 requestId, string memory completionProof) external nonReentrant {
         Request storage request = requests[requestId];
         require(request.completer == msg.sender, "Not the intended completer");
         require(!request.isCompleted, "Already completed");
         require(!request.isCancelled, "Request already cancelled");
 
         request.isCompleted = true;
+        request.completionProof = completionProof;
         token.safeTransfer(msg.sender, request.amount);
         
-        emit RequestCompleted(requestId, msg.sender);
+        emit RequestCompleted(requestId, msg.sender, completionProof);
     }
 
     /// @notice Cancels a request and returns the funds to the requester
@@ -110,6 +114,18 @@ contract FlockIn is ReentrancyGuard {
         token.safeTransfer(msg.sender, request.amount);
         
         emit RequestCancelled(requestId, msg.sender);
+    }
+
+    /// @notice Updates the completion proof for a completed request
+    /// @dev Only the completer can update the proof and the request must be completed
+    function updateCompletionProof(uint256 requestId, string memory newProof) external {
+        Request storage request = requests[requestId];
+        require(request.completer == msg.sender, "Not the completer");
+        require(request.isCompleted, "Request not completed");
+        require(!request.isCancelled, "Request was cancelled");
+
+        request.completionProof = newProof;
+        emit CompletionProofUpdated(requestId, msg.sender, newProof);
     }
 
     /// @notice Gets all requests made by a specific address

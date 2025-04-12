@@ -49,7 +49,7 @@ contract FlockInReviewsTest is Test {
         vm.stopPrank();
 
         vm.startPrank(bob);
-        flockIn.completeRequest(0);
+        flockIn.completeRequest(0, "");
         vm.stopPrank();
 
         // Create a review
@@ -165,7 +165,7 @@ contract FlockInReviewsTest is Test {
         vm.stopPrank();
 
         vm.startPrank(bob);
-        flockIn.completeRequest(0);
+        flockIn.completeRequest(0, "");
         vm.stopPrank();
 
         // Create first review
@@ -202,7 +202,7 @@ contract FlockInReviewsTest is Test {
         vm.stopPrank();
 
         vm.startPrank(bob);
-        flockIn.completeRequest(0);
+        flockIn.completeRequest(0, "");
         vm.stopPrank();
 
         // Try to create review with rating 0
@@ -240,7 +240,7 @@ contract FlockInReviewsTest is Test {
         vm.stopPrank();
 
         vm.startPrank(bob);
-        flockIn.completeRequest(0);
+        flockIn.completeRequest(0, "");
         vm.stopPrank();
 
         vm.startPrank(alice);
@@ -319,7 +319,7 @@ contract FlockInReviewsTest is Test {
         vm.stopPrank();
 
         vm.startPrank(bob);
-        flockIn.completeRequest(0);
+        flockIn.completeRequest(0, "");
         vm.stopPrank();
 
         vm.startPrank(alice);
@@ -352,7 +352,7 @@ contract FlockInReviewsTest is Test {
         vm.stopPrank();
 
         vm.startPrank(bob);
-        flockIn.completeRequest(0);
+        flockIn.completeRequest(0, "");
         vm.stopPrank();
 
         vm.startPrank(alice);

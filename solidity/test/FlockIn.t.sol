@@ -53,7 +53,8 @@ contract FlockInTest is Test {
             uint256 amount,
             bool isCompleted,
             bool isCancelled,
-            string memory storedMessage
+            string memory storedMessage,
+            string memory completionProof
         ) = flockIn.requests(0);
         
         assertEq(id, 0);
@@ -65,6 +66,7 @@ contract FlockInTest is Test {
         assertEq(isCompleted, false);
         assertEq(isCancelled, false);
         assertEq(storedMessage, message);
+        assertEq(completionProof, "");
         
         // Check token transfer
         assertEq(token.balanceOf(address(flockIn)), flockIn.REQUEST_AMOUNT());
@@ -82,7 +84,7 @@ contract FlockInTest is Test {
         // Complete request as Bob
         vm.startPrank(bob);
         uint256 bobBalanceBefore = token.balanceOf(bob);
-        flockIn.completeRequest(0);
+        flockIn.completeRequest(0, "");
         uint256 bobBalanceAfter = token.balanceOf(bob);
         
         // Check Bob received the tokens
@@ -142,7 +144,7 @@ contract FlockInTest is Test {
         // Try to complete as Charlie
         vm.startPrank(charlie);
         vm.expectRevert("Not the intended completer");
-        flockIn.completeRequest(0);
+        flockIn.completeRequest(0, "");
     }
 
     function test_RevertWhen_CancelRequestAsNonRequester() public {
@@ -171,7 +173,7 @@ contract FlockInTest is Test {
         // Try to complete as Bob
         vm.startPrank(bob);
         vm.expectRevert("Request already cancelled");
-        flockIn.completeRequest(0);
+        flockIn.completeRequest(0, "");
     }
 
     function test_RevertWhen_CancelRequestAfterCompletion() public {
@@ -183,7 +185,7 @@ contract FlockInTest is Test {
         
         // Complete request as Bob
         vm.startPrank(bob);
-        flockIn.completeRequest(0);
+        flockIn.completeRequest(0, "");
         vm.stopPrank();
         
         // Try to cancel as Alice
@@ -201,11 +203,11 @@ contract FlockInTest is Test {
         
         // Complete request as Bob
         vm.startPrank(bob);
-        flockIn.completeRequest(0);
+        flockIn.completeRequest(0, "");
         
         // Try to complete again
         vm.expectRevert("Already completed");
-        flockIn.completeRequest(0);
+        flockIn.completeRequest(0, "");
     }
 
     function test_RevertWhen_CancelRequestTwice() public {
@@ -220,5 +222,88 @@ contract FlockInTest is Test {
         // Try to cancel again
         vm.expectRevert("Request already cancelled");
         flockIn.cancelRequest(0);
+    }
+
+    function test_CompleteRequestWithProof() public {
+        // Create request
+        vm.startPrank(alice);
+        token.approve(address(flockIn), type(uint256).max);
+        flockIn.requestFlockIn(aliceFid, bob, bobFid, "Test message");
+        vm.stopPrank();
+        
+        // Complete request as Bob with proof
+        vm.startPrank(bob);
+        string memory proof = "https://github.com/bob/proof";
+        flockIn.completeRequest(0, proof);
+        
+        // Check proof was stored correctly
+        FlockIn.Request memory request = flockIn.getRequest(0);
+        assertEq(request.completionProof, proof);
+        assertEq(request.isCompleted, true);
+        vm.stopPrank();
+    }
+
+    function test_UpdateCompletionProof() public {
+        // Create and complete request
+        vm.startPrank(alice);
+        token.approve(address(flockIn), type(uint256).max);
+        flockIn.requestFlockIn(aliceFid, bob, bobFid, "Test message");
+        vm.stopPrank();
+        
+        vm.startPrank(bob);
+        flockIn.completeRequest(0, "initial proof");
+        
+        // Update proof
+        string memory newProof = "https://github.com/bob/updated-proof";
+        flockIn.updateCompletionProof(0, newProof);
+        
+        // Check proof was updated
+        FlockIn.Request memory request = flockIn.getRequest(0);
+        assertEq(request.completionProof, newProof);
+        vm.stopPrank();
+    }
+
+    function test_RevertWhen_UpdateProofAsNonCompleter() public {
+        // Create and complete request
+        vm.startPrank(alice);
+        token.approve(address(flockIn), type(uint256).max);
+        flockIn.requestFlockIn(aliceFid, bob, bobFid, "Test message");
+        vm.stopPrank();
+        
+        vm.startPrank(bob);
+        flockIn.completeRequest(0, "initial proof");
+        vm.stopPrank();
+        
+        // Try to update proof as Charlie
+        vm.startPrank(charlie);
+        vm.expectRevert("Not the completer");
+        flockIn.updateCompletionProof(0, "new proof");
+    }
+
+    function test_RevertWhen_UpdateProofForUncompletedRequest() public {
+        // Create request
+        vm.startPrank(alice);
+        token.approve(address(flockIn), type(uint256).max);
+        flockIn.requestFlockIn(aliceFid, bob, bobFid, "Test message");
+        vm.stopPrank();
+        
+        // Try to update proof before completion
+        vm.startPrank(bob);
+        vm.expectRevert("Request not completed");
+        flockIn.updateCompletionProof(0, "new proof");
+    }
+
+    function test_RevertWhen_UpdateProofForCancelledRequest() public {
+        // Create and cancel request
+        vm.startPrank(alice);
+        token.approve(address(flockIn), type(uint256).max);
+        flockIn.requestFlockIn(aliceFid, bob, bobFid, "Test message");
+        flockIn.cancelRequest(0);
+        vm.stopPrank();
+        
+        // Try to update proof for cancelled request
+        vm.startPrank(bob);
+        vm.expectRevert("Request not completed");
+        flockIn.updateCompletionProof(0, "new proof");
     }
 } 
