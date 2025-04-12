@@ -5,6 +5,7 @@ import { CancelRequest } from "./CancelRequest";
 import { CompleteRequest } from "./CompleteRequest";
 import { TOKEN_DECIMALS, TOKEN_SYMBOL } from "../constants";
 import { toTokens } from "thirdweb";
+import { Review } from "./Review";
 // Define the user type based on Neynar API response
 interface NeynarUser {
   fid: number;
@@ -44,7 +45,7 @@ export const Request: FC<Props> = ({ request, onSuccess }) => {
       requestIsNotCancelled,
     })
     return currentUserIsRequester && requestIsNotCompleted && requestIsNotCancelled;
-  }, [request.requesterFid, context?.user.fid, request.isCompleted, request.isCancelled]);
+  }, [context?.user.fid, request]);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -98,6 +99,7 @@ export const Request: FC<Props> = ({ request, onSuccess }) => {
         {/* Requester section */}
         <div className="flex items-center space-x-2">
           {requesterUser?.pfp_url && (
+            // eslint-disable-next-line @next/next/no-img-element
             <img 
               src={requesterUser.pfp_url} 
               alt={requesterUser.username || 'Requester'} 
@@ -117,6 +119,7 @@ export const Request: FC<Props> = ({ request, onSuccess }) => {
         {/* Completer section */}
         <div className="flex items-center space-x-2">
           {completerUser?.pfp_url && (
+            // eslint-disable-next-line @next/next/no-img-element
             <img 
               src={completerUser.pfp_url} 
               alt={completerUser.username || 'Completer'} 
@@ -167,6 +170,14 @@ export const Request: FC<Props> = ({ request, onSuccess }) => {
             </span>
           )}
         </div>
+      </div>
+      <div className="mt-1">
+        <Review 
+          requestId={request.id.toString()} 
+          requesterFid={Number(request.requesterFid)}
+          completerFid={Number(request.completerFid)}
+          completer={request.completer}
+        />
       </div>
     </div>
   );
