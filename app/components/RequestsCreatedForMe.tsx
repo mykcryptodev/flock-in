@@ -52,18 +52,29 @@ export const RequestsCreatedForMe: FC<Props> = ({ refreshTrigger }) => {
 
   return (
     <div className="flex flex-col gap-2">
-      <div>My Suggested Rates</div>
-      {userAddress && (
-        <SuggestedPaymentAmountsList address={userAddress} onRemove={handleRemoveSuccess} />
-      )}
-      {showAddSuggestedPaymentAmount ? (
-        <>
-          <AddSuggestedPaymentAmount onSuccess={handleAddSuccess} />
-          <button className="bg-gray-500 text-white p-2 rounded-md" onClick={() => setShowAddSuggestedPaymentAmount(false)}>Cancel</button>
-        </>
-      ) : (
-        <button className="bg-blue-500 text-white p-2 rounded-md" onClick={() => setShowAddSuggestedPaymentAmount(true)}>Add Suggested Rate</button>
-      )}
+      <details className="w-full flex flex-col gap-2">
+        <summary className="cursor-pointer">My Suggested Rates</summary>
+        <div>
+          {userAddress && (
+            <SuggestedPaymentAmountsList 
+              address={userAddress} 
+              onRemove={handleRemoveSuccess} 
+              className="flex flex-col gap-2 p-4 bg-gray-300 rounded-md rounded-b-none"
+              message={`Suggest payment amounts for requests`}
+            />
+          )}
+          {showAddSuggestedPaymentAmount ? (
+            <div className="flex flex-col gap-2 px-4 bg-gray-300 rounded-md rounded-t-none">
+              <AddSuggestedPaymentAmount onSuccess={handleAddSuccess} />
+              <button className="bg-gray-500 w-full text-white p-2 rounded-md mb-4" onClick={() => setShowAddSuggestedPaymentAmount(false)}>Cancel</button>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2 px-4 bg-gray-300 rounded-md rounded-t-none pb-4">
+              <button className="bg-blue-500 w-full text-white p-2 rounded-md" onClick={() => setShowAddSuggestedPaymentAmount(true)}>Add Suggested Rate</button>
+            </div>
+          )}
+        </div>
+      </details>
       <div>Requests Created For Me</div>
       {requests.length === 0 && (
         <div className="text-gray-500 text-sm">No requests created for you</div>

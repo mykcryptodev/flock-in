@@ -32,14 +32,14 @@ export const Request: FC<Props> = ({ request, onSuccess }) => {
   const [requesterUser, setRequesterUser] = useState<NeynarUser | null>(null);
   const [completerUser, setCompleterUser] = useState<NeynarUser | null>(null);
   const [loading, setLoading] = useState(true);
-  const [users, setUsers] = useState<NeynarUser[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   const requestCanBeCancelledByCurrentUser = useMemo(() => {
     const currentUserIsCompleter = isAddressEqual(address ?? '', request.completer);
+    const currentUserIsRequester = isAddressEqual(address ?? '', request.requester);
     const requestIsNotCompleted = !request.isCompleted;
     const requestIsNotCancelled = !request.isCancelled;
-    return currentUserIsCompleter && requestIsNotCompleted && requestIsNotCancelled;
+    return (currentUserIsCompleter || currentUserIsRequester) && requestIsNotCompleted && requestIsNotCancelled;
   }, [request.completer, address, request.isCompleted, request.isCancelled]);
 
   const requestCanBeCompletedByCurrentUser = useMemo(() => {
@@ -68,7 +68,6 @@ export const Request: FC<Props> = ({ request, onSuccess }) => {
         
         // Find the requester and completer in the response
         const users = data.users || [];
-        setUsers(users);
         const requester = users.find((user: NeynarUser) => isAddressEqual(user.address, request.requester));
         const completer = users.find((user: NeynarUser) => isAddressEqual(user.address, request.completer));
         
@@ -100,7 +99,7 @@ export const Request: FC<Props> = ({ request, onSuccess }) => {
   });
 
   if (loading) {
-    return <div>Loading user information...</div>;
+    return <div>Loading...</div>;
   }
 
   if (error) {
