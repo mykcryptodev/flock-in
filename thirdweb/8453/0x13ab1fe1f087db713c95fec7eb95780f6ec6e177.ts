@@ -11,6 +11,42 @@ import {
 */
 
 /**
+ * Represents the filters for the "CompletionProofUpdated" event.
+ */
+export type CompletionProofUpdatedEventFilters = Partial<{
+  requestId: AbiParameterToPrimitiveType<{"indexed":true,"internalType":"uint256","name":"requestId","type":"uint256"}>
+completer: AbiParameterToPrimitiveType<{"indexed":true,"internalType":"address","name":"completer","type":"address"}>
+}>;
+
+/**
+ * Creates an event object for the CompletionProofUpdated event.
+ * @param filters - Optional filters to apply to the event.
+ * @returns The prepared event object.
+ * @example
+ * ```
+ * import { getContractEvents } from "thirdweb";
+ * import { completionProofUpdatedEvent } from "TODO";
+ *
+ * const events = await getContractEvents({
+ * contract,
+ * events: [
+ *  completionProofUpdatedEvent({
+ *  requestId: ...,
+ *  completer: ...,
+ * })
+ * ],
+ * });
+ * ```
+ */
+export function completionProofUpdatedEvent(filters: CompletionProofUpdatedEventFilters = {}) {
+  return prepareEvent({
+    signature: "event CompletionProofUpdated(uint256 indexed requestId, address indexed completer, string newProof)",
+    filters,
+  });
+};
+  
+
+/**
  * Represents the filters for the "RequestCancelled" event.
  */
 export type RequestCancelledEventFilters = Partial<{
@@ -76,7 +112,7 @@ completer: AbiParameterToPrimitiveType<{"indexed":true,"internalType":"address",
  */
 export function requestCompletedEvent(filters: RequestCompletedEventFilters = {}) {
   return prepareEvent({
-    signature: "event RequestCompleted(uint256 indexed requestId, address indexed completer)",
+    signature: "event RequestCompleted(uint256 indexed requestId, address indexed completer, string completionProof)",
     filters,
   });
 };
@@ -155,6 +191,106 @@ export async function REQUEST_AMOUNT(
   ]
 ],
     params: []
+  });
+};
+
+
+/**
+ * Represents the parameters for the "getRequest" function.
+ */
+export type GetRequestParams = {
+  requestId: AbiParameterToPrimitiveType<{"internalType":"uint256","name":"requestId","type":"uint256"}>
+};
+
+/**
+ * Calls the "getRequest" function on the contract.
+ * @param options - The options for the getRequest function.
+ * @returns The parsed result of the function call.
+ * @example
+ * ```
+ * import { getRequest } from "TODO";
+ *
+ * const result = await getRequest({
+ *  requestId: ...,
+ * });
+ *
+ * ```
+ */
+export async function getRequest(
+  options: BaseTransactionOptions<GetRequestParams>
+) {
+  return readContract({
+    contract: options.contract,
+    method: [
+  "0xc58343ef",
+  [
+    {
+      "internalType": "uint256",
+      "name": "requestId",
+      "type": "uint256"
+    }
+  ],
+  [
+    {
+      "components": [
+        {
+          "internalType": "uint256",
+          "name": "id",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "requester",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "requesterFid",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "completer",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "completerFid",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bool",
+          "name": "isCompleted",
+          "type": "bool"
+        },
+        {
+          "internalType": "bool",
+          "name": "isCancelled",
+          "type": "bool"
+        },
+        {
+          "internalType": "string",
+          "name": "message",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "completionProof",
+          "type": "string"
+        }
+      ],
+      "internalType": "struct FlockIn.Request",
+      "name": "",
+      "type": "tuple"
+    }
+  ]
+],
+    params: [options.requestId]
   });
 };
 
@@ -240,6 +376,11 @@ export async function getRequestsMadeByAddress(
         {
           "internalType": "string",
           "name": "message",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "completionProof",
           "type": "string"
         }
       ],
@@ -336,6 +477,11 @@ export async function getRequestsMadeByFid(
           "internalType": "string",
           "name": "message",
           "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "completionProof",
+          "type": "string"
         }
       ],
       "internalType": "struct FlockIn.Request[]",
@@ -431,6 +577,11 @@ export async function getRequestsReceivedByAddress(
           "internalType": "string",
           "name": "message",
           "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "completionProof",
+          "type": "string"
         }
       ],
       "internalType": "struct FlockIn.Request[]",
@@ -525,6 +676,11 @@ export async function getRequestsReceivedByFid(
         {
           "internalType": "string",
           "name": "message",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "completionProof",
           "type": "string"
         }
       ],
@@ -654,6 +810,11 @@ export async function requests(
       "internalType": "string",
       "name": "message",
       "type": "string"
+    },
+    {
+      "internalType": "string",
+      "name": "completionProof",
+      "type": "string"
     }
   ]
 ],
@@ -751,6 +912,7 @@ export function cancelRequest(
  */
 export type CompleteRequestParams = {
   requestId: AbiParameterToPrimitiveType<{"internalType":"uint256","name":"requestId","type":"uint256"}>
+completionProof: AbiParameterToPrimitiveType<{"internalType":"string","name":"completionProof","type":"string"}>
 };
 
 /**
@@ -763,6 +925,7 @@ export type CompleteRequestParams = {
  *
  * const transaction = completeRequest({
  *  requestId: ...,
+ *  completionProof: ...,
  * });
  *
  * // Send the transaction
@@ -776,17 +939,22 @@ export function completeRequest(
   return prepareContractCall({
     contract: options.contract,
     method: [
-  "0xcc1e0359",
+  "0xab2cb4f9",
   [
     {
       "internalType": "uint256",
       "name": "requestId",
       "type": "uint256"
+    },
+    {
+      "internalType": "string",
+      "name": "completionProof",
+      "type": "string"
     }
   ],
   []
 ],
-    params: [options.requestId]
+    params: [options.requestId, options.completionProof]
   });
 };
 
@@ -853,6 +1021,58 @@ export function requestFlockIn(
   []
 ],
     params: [options.requesterFid, options.completer, options.completerFid, options.message]
+  });
+};
+
+
+/**
+ * Represents the parameters for the "updateCompletionProof" function.
+ */
+export type UpdateCompletionProofParams = {
+  requestId: AbiParameterToPrimitiveType<{"internalType":"uint256","name":"requestId","type":"uint256"}>
+newProof: AbiParameterToPrimitiveType<{"internalType":"string","name":"newProof","type":"string"}>
+};
+
+/**
+ * Calls the "updateCompletionProof" function on the contract.
+ * @param options - The options for the "updateCompletionProof" function.
+ * @returns A prepared transaction object.
+ * @example
+ * ```
+ * import { updateCompletionProof } from "TODO";
+ *
+ * const transaction = updateCompletionProof({
+ *  requestId: ...,
+ *  newProof: ...,
+ * });
+ *
+ * // Send the transaction
+ * ...
+ *
+ * ```
+ */
+export function updateCompletionProof(
+  options: BaseTransactionOptions<UpdateCompletionProofParams>
+) {
+  return prepareContractCall({
+    contract: options.contract,
+    method: [
+  "0x3e158f46",
+  [
+    {
+      "internalType": "uint256",
+      "name": "requestId",
+      "type": "uint256"
+    },
+    {
+      "internalType": "string",
+      "name": "newProof",
+      "type": "string"
+    }
+  ],
+  []
+],
+    params: [options.requestId, options.newProof]
   });
 };
 

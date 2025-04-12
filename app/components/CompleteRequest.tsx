@@ -1,4 +1,4 @@
-import { completeRequest } from "@/thirdweb/8453/0x93f36b72db1dc47e3ad50e126d75b6d3a39c21d6";
+import { completeRequest } from "@/thirdweb/8453/0x13ab1fe1f087db713c95fec7eb95780f6ec6e177";
 import { Transaction } from "@coinbase/onchainkit/transaction";
 import { TransactionButton } from "@coinbase/onchainkit/transaction";
 import { FC, useCallback } from "react";
@@ -52,6 +52,7 @@ export const CompleteRequest: FC<Props> = ({ requestId, requesterFid, onSuccess 
         chain: CHAIN,
       }),
       requestId: BigInt(requestId),
+      completionProof: "",
     });
     const encodedTx = await encode(tx);
     return [
