@@ -155,4 +155,11 @@ contract FlockIn is ReentrancyGuard {
         }
         return result;
     }
+
+    /// @notice Gets a request by its ID
+    /// @param requestId The ID of the request to get
+    /// @return The request struct containing all request data
+    function getRequest(uint256 requestId) external view returns (Request memory) {
+        return requests[requestId];
+    }
 } 
