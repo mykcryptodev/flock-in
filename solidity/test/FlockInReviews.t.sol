@@ -21,9 +21,6 @@ contract FlockInReviewsTest is Test {
     address public bob = address(0x2);
     address public charlie = address(0x3);
     
-    uint256 public aliceFid = 1;
-    uint256 public bobFid = 2;
-    uint256 public charlieFid = 3;
     uint256 public constant TEST_AMOUNT = 10 * 10**18;
 
     function setUp() public {
@@ -46,7 +43,7 @@ contract FlockInReviewsTest is Test {
         // Create and complete request
         vm.startPrank(alice);
         token.approve(address(flockIn), type(uint256).max);
-        flockIn.requestFlockIn(aliceFid, bob, bobFid, address(token), TEST_AMOUNT, "Test message");
+        flockIn.requestFlockIn(bob, address(token), TEST_AMOUNT, "Test message");
         vm.stopPrank();
         
         vm.startPrank(bob);
@@ -57,16 +54,14 @@ contract FlockInReviewsTest is Test {
         vm.startPrank(alice);
         string memory comment = "Great work!";
         bytes memory metadata = "0x1234";
-        reviews.createReview(0, aliceFid, bob, bobFid, 5, comment, metadata);
+        reviews.createReview(0, bob, 5, comment, metadata);
         
         // Check review was created correctly
         FlockInReviews.Review memory review = reviews.getReview(1);
         assertEq(review.id, 1);
         assertEq(review.requestId, 0);
         assertEq(review.reviewer, alice);
-        assertEq(review.reviewerFid, aliceFid);
         assertEq(review.reviewee, bob);
-        assertEq(review.revieweeFid, bobFid);
         assertEq(review.rating, 5);
         assertEq(review.comment, comment);
         assertEq(review.metadata, metadata);
@@ -78,7 +73,7 @@ contract FlockInReviewsTest is Test {
         // Create request, complete it, and create review
         vm.startPrank(alice);
         token.approve(address(flockIn), type(uint256).max);
-        flockIn.requestFlockIn(aliceFid, bob, bobFid, address(token), TEST_AMOUNT, "Test message");
+        flockIn.requestFlockIn(bob, address(token), TEST_AMOUNT, "Test message");
         vm.stopPrank();
         
         vm.startPrank(bob);
@@ -86,7 +81,7 @@ contract FlockInReviewsTest is Test {
         vm.stopPrank();
         
         vm.startPrank(alice);
-        reviews.createReview(0, aliceFid, bob, bobFid, 5, "Great work!", "");
+        reviews.createReview(0, bob, 5, "Great work!", "");
         vm.stopPrank();
         
         // Leave reviewee comment
@@ -100,12 +95,12 @@ contract FlockInReviewsTest is Test {
         vm.stopPrank();
     }
 
-    function test_GetReviewsByRevieweeFid() public {
+    function test_GetReviewsByReviewee() public {
         // Create two requests and reviews
         vm.startPrank(alice);
         token.approve(address(flockIn), type(uint256).max);
-        flockIn.requestFlockIn(aliceFid, bob, bobFid, address(token), TEST_AMOUNT, "First message");
-        flockIn.requestFlockIn(aliceFid, bob, bobFid, address(token), TEST_AMOUNT, "Second message");
+        flockIn.requestFlockIn(bob, address(token), TEST_AMOUNT, "First message");
+        flockIn.requestFlockIn(bob, address(token), TEST_AMOUNT, "Second message");
         vm.stopPrank();
         
         vm.startPrank(bob);
@@ -114,12 +109,12 @@ contract FlockInReviewsTest is Test {
         vm.stopPrank();
         
         vm.startPrank(alice);
-        reviews.createReview(0, aliceFid, bob, bobFid, 5, "First review", "");
-        reviews.createReview(1, aliceFid, bob, bobFid, 4, "Second review", "");
+        reviews.createReview(0, bob, 5, "First review", "");
+        reviews.createReview(1, bob, 4, "Second review", "");
         vm.stopPrank();
         
         // Get reviews for Bob
-        uint256[] memory bobReviews = reviews.getReviewsByRevieweeFid(bobFid);
+        uint256[] memory bobReviews = reviews.getReviewsByReviewee(bob);
         assertEq(bobReviews.length, 2);
         assertEq(bobReviews[0], 1);
         assertEq(bobReviews[1], 2);
@@ -128,27 +123,27 @@ contract FlockInReviewsTest is Test {
     function test_RevertWhen_CreateReviewForNonExistentRequest() public {
         vm.startPrank(alice);
         vm.expectRevert();
-        reviews.createReview(999, aliceFid, bob, bobFid, 5, "Test review", "");
+        reviews.createReview(999, bob, 5, "Test review", "");
     }
 
     function test_RevertWhen_CreateReviewAsNonRequester() public {
         // Create request
         vm.startPrank(alice);
         token.approve(address(flockIn), type(uint256).max);
-        flockIn.requestFlockIn(aliceFid, bob, bobFid, address(token), TEST_AMOUNT, "Test message");
+        flockIn.requestFlockIn(bob, address(token), TEST_AMOUNT, "Test message");
         vm.stopPrank();
         
         // Try to create review as Bob
         vm.startPrank(bob);
         vm.expectRevert("Only the requester can create a review");
-        reviews.createReview(0, bobFid, bob, bobFid, 5, "Test review", "");
+        reviews.createReview(0, bob, 5, "Test review", "");
     }
 
     function test_RevertWhen_CreateReviewWithInvalidRating() public {
         // Create and complete request
         vm.startPrank(alice);
         token.approve(address(flockIn), type(uint256).max);
-        flockIn.requestFlockIn(aliceFid, bob, bobFid, address(token), TEST_AMOUNT, "Test message");
+        flockIn.requestFlockIn(bob, address(token), TEST_AMOUNT, "Test message");
         vm.stopPrank();
         
         vm.startPrank(bob);
@@ -158,14 +153,14 @@ contract FlockInReviewsTest is Test {
         // Try to create review with invalid rating
         vm.startPrank(alice);
         vm.expectRevert("Rating must be between 1 and 5");
-        reviews.createReview(0, aliceFid, bob, bobFid, 6, "Test review", "");
+        reviews.createReview(0, bob, 6, "Test review", "");
     }
 
     function test_RevertWhen_LeaveRevieweeCommentAsNonReviewee() public {
         // Create request, complete it, and create review
         vm.startPrank(alice);
         token.approve(address(flockIn), type(uint256).max);
-        flockIn.requestFlockIn(aliceFid, bob, bobFid, address(token), TEST_AMOUNT, "Test message");
+        flockIn.requestFlockIn(bob, address(token), TEST_AMOUNT, "Test message");
         vm.stopPrank();
         
         vm.startPrank(bob);
@@ -173,7 +168,7 @@ contract FlockInReviewsTest is Test {
         vm.stopPrank();
         
         vm.startPrank(alice);
-        reviews.createReview(0, aliceFid, bob, bobFid, 5, "Great work!", "");
+        reviews.createReview(0, bob, 5, "Great work!", "");
         vm.stopPrank();
         
         // Try to leave comment as Charlie

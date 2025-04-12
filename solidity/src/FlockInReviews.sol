@@ -12,9 +12,7 @@ contract FlockInReviews {
         uint256 id;
         uint256 requestId;
         address reviewer;
-        uint256 reviewerFid;
         address reviewee;
-        uint256 revieweeFid;
         uint256 rating;
         string comment;
         string revieweeComment;
@@ -31,8 +29,8 @@ contract FlockInReviews {
     // Mapping from reviewId to requestId
     mapping(uint256 => uint256) public requestIdByReviewId;
 
-    // Mapping from revieweeFid to reviewIds
-    mapping(uint256 => uint256[]) public reviewsByRevieweeFid;
+    // Mapping from reviewee address to reviewIds
+    mapping(address => uint256[]) public reviewsByReviewee;
 
     // Reference to the FlockIn contract
     FlockIn public immutable flockIn;
@@ -60,9 +58,7 @@ contract FlockInReviews {
     /// @dev Only the requester of the original request can create a review
     function createReview(
         uint256 requestId,
-        uint256 reviewerFid,
         address reviewee,
-        uint256 revieweeFid,
         uint256 rating,
         string memory comment,
         bytes memory metadata
@@ -81,9 +77,7 @@ contract FlockInReviews {
             id: reviewId,
             requestId: requestId,
             reviewer: msg.sender,
-            reviewerFid: reviewerFid,
             reviewee: reviewee,
-            revieweeFid: revieweeFid,
             rating: rating,
             comment: comment,
             revieweeComment: "",
@@ -94,7 +88,7 @@ contract FlockInReviews {
         reviews[reviewId] = newReview;
         reviewIdByRequestId[requestId] = reviewId;
         requestIdByReviewId[reviewId] = requestId;
-        reviewsByRevieweeFid[revieweeFid].push(reviewId);
+        reviewsByReviewee[reviewee].push(reviewId);
         emit ReviewCreated(reviewId, requestId, msg.sender, reviewee, rating, comment, !request.isCompleted);
     }
 
@@ -125,10 +119,10 @@ contract FlockInReviews {
         review.revieweeComment = comment;
     }
 
-    /// @notice Gets all reviews for a given revieweeFid
-    /// @param revieweeFid The FID of the reviewee to get reviews for
+    /// @notice Gets all reviews for a given reviewee address
+    /// @param reviewee The address of the reviewee to get reviews for
     /// @return An array of review IDs
-    function getReviewsByRevieweeFid(uint256 revieweeFid) external view returns (uint256[] memory) {
-        return reviewsByRevieweeFid[revieweeFid];
+    function getReviewsByReviewee(address reviewee) external view returns (uint256[] memory) {
+        return reviewsByReviewee[reviewee];
     }
 } 

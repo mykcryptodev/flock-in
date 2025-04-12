@@ -15,9 +15,7 @@ contract FlockIn is ReentrancyGuard {
     struct Request {
         uint256 id;
         address requester;
-        uint256 requesterFid;
         address completer;
-        uint256 completerFid;
         address token;
         uint256 amount;
         bool isCompleted;
@@ -32,8 +30,6 @@ contract FlockIn is ReentrancyGuard {
     // Index mappings that store request IDs instead of full Request structs
     mapping(address => uint256[]) private requestIdsByRequester;
     mapping(address => uint256[]) private requestIdsByCompleter;
-    mapping(uint256 => uint256[]) private requestIdsByRequesterFid;
-    mapping(uint256 => uint256[]) private requestIdsByCompleterFid;
 
     /// @notice Counter to generate unique request IDs
     uint256 public requestCounter;
@@ -47,16 +43,12 @@ contract FlockIn is ReentrancyGuard {
     constructor() {}
 
     /// @notice Creates a new request by transferring tokens to the contract
-    /// @param requesterFid The Farcaster ID of the requester
     /// @param completer The address of the completer
-    /// @param completerFid The Farcaster ID of the completer
     /// @param token The address of the ERC20 token to use
     /// @param amount The amount of tokens to transfer
     /// @param message The message associated with the request
     function requestFlockIn(
-        uint256 requesterFid,
         address completer,
-        uint256 completerFid,
         address token,
         uint256 amount,
         string memory message
@@ -71,9 +63,7 @@ contract FlockIn is ReentrancyGuard {
         Request memory newRequest = Request({
             id: requestId,
             requester: msg.sender,
-            requesterFid: requesterFid,
             completer: completer,
-            completerFid: completerFid,
             token: token,
             amount: amount,
             isCompleted: false,
@@ -87,8 +77,6 @@ contract FlockIn is ReentrancyGuard {
         // Store only the request ID in the index mappings
         requestIdsByRequester[msg.sender].push(requestId);
         requestIdsByCompleter[completer].push(requestId);
-        requestIdsByRequesterFid[requesterFid].push(requestId);
-        requestIdsByCompleterFid[completerFid].push(requestId);
 
         emit RequestCreated(requestId, msg.sender, completer, token, amount, message);
     }
@@ -146,28 +134,6 @@ contract FlockIn is ReentrancyGuard {
     /// @notice Gets all requests received by a specific address
     function getRequestsReceivedByAddress(address completer) external view returns (Request[] memory) {
         uint256[] storage requestIds = requestIdsByCompleter[completer];
-        Request[] memory result = new Request[](requestIds.length);
-        
-        for (uint256 i = 0; i < requestIds.length; i++) {
-            result[i] = requests[requestIds[i]];
-        }
-        return result;
-    }
-
-    /// @notice Gets all requests made by a specific Farcaster ID
-    function getRequestsMadeByFid(uint256 requesterFid) external view returns (Request[] memory) {
-        uint256[] storage requestIds = requestIdsByRequesterFid[requesterFid];
-        Request[] memory result = new Request[](requestIds.length);
-        
-        for (uint256 i = 0; i < requestIds.length; i++) {
-            result[i] = requests[requestIds[i]];
-        }
-        return result;
-    }
-
-    /// @notice Gets all requests received by a specific Farcaster ID
-    function getRequestsReceivedByFid(uint256 completerFid) external view returns (Request[] memory) {
-        uint256[] storage requestIds = requestIdsByCompleterFid[completerFid];
         Request[] memory result = new Request[](requestIds.length);
         
         for (uint256 i = 0; i < requestIds.length; i++) {

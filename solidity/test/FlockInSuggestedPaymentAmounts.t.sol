@@ -19,8 +19,6 @@ contract FlockInSuggestedPaymentAmountsTest is Test {
     address public alice = address(0x1);
     address public bob = address(0x2);
     
-    uint256 public aliceFid = 1;
-    uint256 public bobFid = 2;
     uint256 public constant TEST_AMOUNT1 = 10 * 10**18;
     uint256 public constant TEST_AMOUNT2 = 20 * 10**18;
 
@@ -33,7 +31,7 @@ contract FlockInSuggestedPaymentAmountsTest is Test {
 
     function test_AddSuggestedAmount() public {
         vm.startPrank(alice);
-        suggestedAmounts.addSuggestedAmount(aliceFid, address(token1), TEST_AMOUNT1);
+        suggestedAmounts.addSuggestedAmount(address(token1), TEST_AMOUNT1);
         vm.stopPrank();
 
         // Get suggested amounts by address
@@ -42,24 +40,14 @@ contract FlockInSuggestedPaymentAmountsTest is Test {
         
         assertEq(amounts.length, 1);
         assertEq(amounts[0].completer, alice);
-        assertEq(amounts[0].completerFid, aliceFid);
-        assertEq(amounts[0].token, address(token1));
-        assertEq(amounts[0].amount, TEST_AMOUNT1);
-
-        // Get suggested amounts by FID
-        amounts = suggestedAmounts.getSuggestedAmountsByFid(aliceFid);
-        
-        assertEq(amounts.length, 1);
-        assertEq(amounts[0].completer, alice);
-        assertEq(amounts[0].completerFid, aliceFid);
         assertEq(amounts[0].token, address(token1));
         assertEq(amounts[0].amount, TEST_AMOUNT1);
     }
 
     function test_AddMultipleSuggestedAmounts() public {
         vm.startPrank(alice);
-        suggestedAmounts.addSuggestedAmount(aliceFid, address(token1), TEST_AMOUNT1);
-        suggestedAmounts.addSuggestedAmount(aliceFid, address(token2), TEST_AMOUNT2);
+        suggestedAmounts.addSuggestedAmount(address(token1), TEST_AMOUNT1);
+        suggestedAmounts.addSuggestedAmount(address(token2), TEST_AMOUNT2);
         vm.stopPrank();
 
         // Get suggested amounts by address
@@ -70,13 +58,11 @@ contract FlockInSuggestedPaymentAmountsTest is Test {
         
         // Check first amount
         assertEq(amounts[0].completer, alice);
-        assertEq(amounts[0].completerFid, aliceFid);
         assertEq(amounts[0].token, address(token1));
         assertEq(amounts[0].amount, TEST_AMOUNT1);
         
         // Check second amount
         assertEq(amounts[1].completer, alice);
-        assertEq(amounts[1].completerFid, aliceFid);
         assertEq(amounts[1].token, address(token2));
         assertEq(amounts[1].amount, TEST_AMOUNT2);
     }
@@ -84,8 +70,8 @@ contract FlockInSuggestedPaymentAmountsTest is Test {
     function test_RemoveSuggestedAmount() public {
         // Add two amounts
         vm.startPrank(alice);
-        suggestedAmounts.addSuggestedAmount(aliceFid, address(token1), TEST_AMOUNT1);
-        suggestedAmounts.addSuggestedAmount(aliceFid, address(token2), TEST_AMOUNT2);
+        suggestedAmounts.addSuggestedAmount(address(token1), TEST_AMOUNT1);
+        suggestedAmounts.addSuggestedAmount(address(token2), TEST_AMOUNT2);
         
         // Remove first amount
         suggestedAmounts.removeSuggestedAmount(address(token1));
@@ -103,13 +89,13 @@ contract FlockInSuggestedPaymentAmountsTest is Test {
     function test_RevertWhen_AddSuggestedAmountWithZeroAmount() public {
         vm.startPrank(alice);
         vm.expectRevert("Amount must be greater than 0");
-        suggestedAmounts.addSuggestedAmount(aliceFid, address(token1), 0);
+        suggestedAmounts.addSuggestedAmount(address(token1), 0);
     }
 
     function test_RevertWhen_AddSuggestedAmountWithZeroAddress() public {
         vm.startPrank(alice);
         vm.expectRevert("Invalid token address");
-        suggestedAmounts.addSuggestedAmount(aliceFid, address(0), TEST_AMOUNT1);
+        suggestedAmounts.addSuggestedAmount(address(0), TEST_AMOUNT1);
     }
 
     function test_GetEmptySuggestedAmounts() public {
@@ -117,21 +103,17 @@ contract FlockInSuggestedPaymentAmountsTest is Test {
         FlockInSuggestedPaymentAmounts.SuggestedPaymentAmount[] memory amounts = 
             suggestedAmounts.getSuggestedAmountsByAddress(alice);
         assertEq(amounts.length, 0);
-
-        // Get suggested amounts for FID with no amounts
-        amounts = suggestedAmounts.getSuggestedAmountsByFid(aliceFid);
-        assertEq(amounts.length, 0);
     }
 
     function test_MultipleUsersSuggestedAmounts() public {
         // Alice adds amounts
         vm.startPrank(alice);
-        suggestedAmounts.addSuggestedAmount(aliceFid, address(token1), TEST_AMOUNT1);
+        suggestedAmounts.addSuggestedAmount(address(token1), TEST_AMOUNT1);
         vm.stopPrank();
 
         // Bob adds amounts
         vm.startPrank(bob);
-        suggestedAmounts.addSuggestedAmount(bobFid, address(token1), TEST_AMOUNT2);
+        suggestedAmounts.addSuggestedAmount(address(token1), TEST_AMOUNT2);
         vm.stopPrank();
 
         // Check Alice's amounts
