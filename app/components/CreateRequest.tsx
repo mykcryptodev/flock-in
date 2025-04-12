@@ -193,11 +193,14 @@ export const CreateRequest: FC<Props> = ({ onSuccess }) => {
       </div>
       <h1>Select a Payment Token</h1>
       {completerAddress && isAddress(completerAddress, { strict: false }) && (
-        <SuggestedPaymentAmountsList 
-          address={completerAddress} 
-          onClick={handleSuggestedPaymentAmountClick} 
-          showTitle={true}
-        />
+        <div className="flex flex-col gap-2 p-4 bg-gray-300 rounded-md">
+          <SuggestedPaymentAmountsList 
+            address={completerAddress} 
+            onClick={handleSuggestedPaymentAmountClick} 
+            showTitle={true}
+            message={`${selectedUser?.display_name ?? selectedUser?.username} suggests these prices for requests`}
+          />        
+        </div>
       )}
       <div className="my-2">
         <TokenPicker selectedToken={token} onTokenChange={setToken} />

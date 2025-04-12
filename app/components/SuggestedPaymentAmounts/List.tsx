@@ -10,6 +10,7 @@ import { useReadContract } from "thirdweb/react";
 import { useAccount } from "wagmi";
 import { Remove } from "./Remove";
 import { isAddress, isAddressEqual } from "viem";
+import { TokenImage } from "../Token/Image";
 
 const client = createThirdwebClient({
   clientId: process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID!,
@@ -19,10 +20,11 @@ type Props = {
   address: string;
   onRemove?: () => void;
   showTitle?: boolean;
+  message?: string;
   onClick?: (amount: bigint, token: string) => void;
 };
 
-export const SuggestedPaymentAmountsList = ({ address, onRemove, showTitle, onClick }: Props) => {
+export const SuggestedPaymentAmountsList = ({ address, onRemove, showTitle, message, onClick }: Props) => {
   const { address: userAddress } = useAccount();
   const [userPreferredPaymentAmounts, setUserPreferredPaymentAmounts] = useState<{
     token: string;
@@ -72,11 +74,16 @@ export const SuggestedPaymentAmountsList = ({ address, onRemove, showTitle, onCl
   return (
     <div className="flex flex-col gap-2">
       {showTitle && <h2 className="text-sm">Suggested Payment Amounts</h2>}
+      {message && <p className="text-xs">{message}</p>}
       {userPreferredPaymentAmounts.map((amount, index) => (
         <div className="flex w-full justify-between items-center gap-2 bg-white p-3 rounded-md" key={`${amount.token}-${index}`}>
           <div onClick={() => onClick?.(amount.amount, amount.token)} className="flex gap-2 items-center w-full">
             <TokenProvider address={amount.token} client={client} chain={CHAIN}>
-              <TokenIcon className="w-4 h-4" />
+              <TokenIcon 
+                className="w-10 h-10" 
+                fallbackComponent={<TokenImage token={amount.token} className="w-10 h-10 rounded-full" />} 
+                loadingComponent={<div className="w-10 h-10 bg-gray-200 rounded-full animate-pulse" />}
+              />
               <div className="flex flex-col gap-1">
                 <TokenSymbol />
               <TokenName />

@@ -2,7 +2,7 @@ import { getTokens } from "@coinbase/onchainkit/api";
 import { Token, TokenSearch } from "@coinbase/onchainkit/token";
 import { useCallback, useState } from "react";
 import { isAddress, shortenAddress } from "thirdweb/utils";
-
+import { TokenImage } from "./Token/Image";
 
 type Props = {
   onTokenChange: (token: Token | null) => void;
@@ -45,13 +45,15 @@ export const TokenPicker = ({ onTokenChange, selectedToken }: Props) => {
         onClick={() => onTokenChange(null)}
       >
         <div className="flex items-center space-x-3">
-          {selectedToken.image && (
+          {selectedToken.image ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={selectedToken.image}
               alt={selectedToken.symbol}
               className="w-10 h-10 rounded-full"
             />
+          ) : (
+            <TokenImage token={selectedToken.address} className="w-10 h-10 rounded-full" />
           )}
           <div>
             <div className="font-medium">{selectedToken.name}</div>
