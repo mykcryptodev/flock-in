@@ -65,41 +65,45 @@ export const Nav: FC<Props> = ({ activeTab, onTabSelect }) => {
 
   return (
     <div className="flex flex-col gap-2 mb-4">
-      <div className="flex justify-between items-center p-4 w-full">
+      <div className="flex justify-between items-start p-4 w-full">
         <div className="flex flex-col">
           {logo}
         </div>
         <div className="flex justify-end gap-1">
-          <div className="flex justify-start">
-            {address ? (
-              <Identity
-                address={address}
-                schemaId={SCHEMA_UID}
-                className="!bg-inherit p-0 [&>div]:space-x-2"
-              >
-                <Avatar 
-                  address={address} 
-                  defaultComponent={
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={context?.user.pfpUrl} alt="pfp" className="w-6 h-6 rounded-full" />
-                  }
-                  sizes="sm"
-                  className="w-6 h-6"
-                />
-                <Name className="text-inherit">
-                  <Badge
-                    tooltip="High Scorer"
-                    className="!bg-inherit high-score-badge"
+          <div className="flex flex-col gap-2">
+            <div className="flex justify-start">
+              {address ? (
+                <Identity
+                  address={address}
+                  schemaId={SCHEMA_UID}
+                  className="!bg-inherit p-0 [&>div]:space-x-2"
+                >
+                  <Avatar 
+                    address={address} 
+                    defaultComponent={
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={context?.user.pfpUrl} alt="pfp" className="w-6 h-6 rounded-full" />
+                    }
+                    sizes="sm"
+                    className="w-6 h-6"
                   />
-                </Name>
-              </Identity>
-            ) : (
-              <div className="text-gray-500 text-sm font-semibold">
-                Connecting...
-              </div>
-            )}
+                  <Name className="text-inherit">
+                    <Badge
+                      tooltip="High Scorer"
+                      className="!bg-inherit high-score-badge"
+                    />
+                  </Name>
+                </Identity>
+              ) : (
+                <div className="text-gray-500 text-sm font-semibold">
+                  Connecting...
+                </div>
+              )}
+            </div>
+            <div className="flex justify-end">
+              {saveFrameButton}
+            </div>
           </div>
-          {saveFrameButton}
         </div>
       </div>
       <div className="grid grid-cols-3 w-full justify-around items-center gap-4 px-4">
