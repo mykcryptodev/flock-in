@@ -1,4 +1,4 @@
-import { FC, useEffect } from "react";
+import { FC, memo, useEffect } from "react";
 import { getSuggestedAmountsByAddress } from "@/thirdweb/8453/0xf0af2c550b51f3e4fe1b7dcfd4ac8a7093f54b94";
 
 import { createThirdwebClient, getContract, toTokens } from "thirdweb";
@@ -26,7 +26,7 @@ type Props = {
   className?: string;
 };
 
-export const SuggestedPaymentAmountsList = ({ address, onRemove, showTitle, message, onClick, className }: Props) => {
+export const SuggestedPaymentAmountsList = memo(({ address, onRemove, showTitle, message, onClick, className }: Props) => {
   const { address: userAddress } = useAccount();
   const [userPreferredPaymentAmounts, setUserPreferredPaymentAmounts] = useState<{
     token: string;
@@ -118,4 +118,4 @@ export const SuggestedPaymentAmountsList = ({ address, onRemove, showTitle, mess
       ))}
     </div>
   );
-};
+});
