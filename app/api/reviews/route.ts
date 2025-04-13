@@ -36,10 +36,10 @@ export async function GET(request: Request) {
   const cacheKey = `${REVIEWS_CACHE_PREFIX}${normalizedAddress}`;
   
   // Check if we have cached data for this address
-  // const cachedData = await getCachedData(cacheKey);
-  // if (cachedData) {
-  //   return NextResponse.json(cachedData);
-  // }
+  const cachedData = await getCachedData(cacheKey);
+  if (cachedData) {
+    return NextResponse.json(cachedData);
+  }
 
   const reviews = await getFullReviewByReviewee({
     contract: getContract({
@@ -66,9 +66,6 @@ export async function GET(request: Request) {
     reviewersMap.set(user.address.toLowerCase(), user);
   });
 
-  // Log the Map contents in a readable format
-  console.log('Reviewers Map:', Object.fromEntries(reviewersMap));
-
   const reviewsMappedBigInts = reviews.map((review) => {
     const reviewerInfo = reviewersMap.get(review.reviewer.toLowerCase());
     return {
@@ -80,12 +77,10 @@ export async function GET(request: Request) {
     };
   });
 
-  console.log(JSON.stringify(reviewsMappedBigInts, null, 2));
-
   const responseData = { reviews: reviewsMappedBigInts };
   
   // Cache the response data for 5 minutes (300 seconds)
-  // await setCachedData(cacheKey, responseData, 300);
+  await setCachedData(cacheKey, responseData, 300);
   
   return NextResponse.json(responseData);
 }
