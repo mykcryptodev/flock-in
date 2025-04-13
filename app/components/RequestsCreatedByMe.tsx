@@ -46,7 +46,12 @@ export const RequestsCreatedByMe: FC<Props> = ({ refreshTrigger }) => {
       )}
       {requests.map((request) => (
         <div key={request.id.toString()}>
-          <Request key={request.id.toString()} request={request} onSuccess={() => setLastSuccess(new Date().getTime().toString())} />
+          <Request 
+            key={request.id.toString()} 
+            request={request} 
+            onSuccess={() => setLastSuccess(new Date().getTime().toString())} 
+            hideRequester={true}
+          />
         </div>
       ))}
     </div>

@@ -28,9 +28,10 @@ type Props = {
   request: Awaited<ReturnType<typeof getRequestsReceivedByAddress>>[number];
   onSuccess: () => void;
   hideCompleter?: boolean;
+  hideRequester?: boolean;
 }
 
-export const Request: FC<Props> = ({ request, onSuccess, hideCompleter = false }) => {
+export const Request: FC<Props> = ({ request, onSuccess, hideCompleter = false, hideRequester = false }) => {
   const { address } = useAccount();
   const [requesterUser, setRequesterUser] = useState<NeynarUser | null>(null);
   const [completerUser, setCompleterUser] = useState<NeynarUser | null>(null);
@@ -127,24 +128,26 @@ export const Request: FC<Props> = ({ request, onSuccess, hideCompleter = false }
     <div className="border rounded-lg p-4 mb-4 shadow-sm">
       <div className="flex flex-col space-y-4">
         {/* Requester section */}
-        <div className="flex items-center space-x-2">
-          {requesterUser?.pfp_url && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img 
-              src={requesterUser.pfp_url} 
-              alt={requesterUser.username || 'Requester'} 
-              className="w-10 h-10 rounded-full"
-            />
-          )}
-          <div>
-            <p className="font-medium">
-              {requesterUser?.display_name || requesterUser?.username || `User ${request.requester}`}
-            </p>
-            <p className="text-sm text-gray-500">
-              Requested by {requesterUser?.username || `@user${request.requester}`}
-            </p>
+        {!hideRequester && (
+          <div className="flex items-center space-x-2">
+            {requesterUser?.pfp_url && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img 
+                src={requesterUser.pfp_url} 
+                alt={requesterUser.username || 'Requester'} 
+                className="w-10 h-10 rounded-full"
+              />
+            )}
+            <div>
+              <p className="font-medium">
+                {requesterUser?.display_name || requesterUser?.username || `User ${request.requester}`}
+              </p>
+              <p className="text-sm text-gray-500">
+                Requested by {requesterUser?.username || `@user${request.requester}`}
+              </p>
+            </div>
           </div>
-        </div>
+        )}
         
         {/* Completer section */}
         {!hideCompleter && (
