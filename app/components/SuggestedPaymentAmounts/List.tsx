@@ -11,6 +11,7 @@ import { useAccount } from "wagmi";
 import { Remove } from "./Remove";
 import { isAddress, isAddressEqual } from "viem";
 import { TokenImage } from "../Token/Image";
+import Sparkle from "@/app/svg/Sparkle";
 
 const client = createThirdwebClient({
   clientId: process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID!,
@@ -72,20 +73,32 @@ export const SuggestedPaymentAmountsList = ({ address, onRemove, showTitle, mess
     return null;
   };
 
+  const getIcon = (token: string) => async () => {
+    const response = await fetch(`/api/tokens/image?chain=${CHAIN}&address=${token}`);
+    const data = await response.json();
+    return data.image;
+  };
+
   if (userPreferredPaymentAmounts.length === 0) {
     return null;
   }
 
   return (
     <div className={`flex flex-col gap-2 ${className}`}>
-      {showTitle && <h2 className="text-sm">Suggested Payment Amounts</h2>}
+      {showTitle && (
+        <h2 className="text-sm flex items-center gap-2">
+          <Sparkle />
+          Suggested Payment Amounts
+        </h2>
+      )}
       {message && <p className="text-xs">{message}</p>}
       {userPreferredPaymentAmounts.map((amount, index) => (
         <div className="flex w-full justify-between items-center gap-2 bg-white p-3 rounded-md" key={`${amount.token}-${index}`}>
           <div onClick={() => onClick?.(amount.amount, amount.token)} className="flex gap-2 items-center w-full">
             <TokenProvider address={amount.token} client={client} chain={CHAIN}>
               <TokenIcon 
-                className="w-10 h-10" 
+                className="w-10 h-10 rounded-full" 
+                iconResolver={getIcon(amount.token)}
                 fallbackComponent={<TokenImage token={amount.token} className="w-10 h-10 rounded-full" />} 
                 loadingComponent={<div className="w-10 h-10 bg-gray-200 rounded-full animate-pulse" />}
               />

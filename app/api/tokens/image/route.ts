@@ -8,7 +8,10 @@ const TOKEN_IMAGE_CACHE_PREFIX = 'token_image:';
 
 // Token image overrides (lowercase address to image URL)
 const TOKEN_IMAGE_OVERRIDES = new Map<string, string>([
+  // flocka
   ['0xdc471c5c72de413e4877ced49b8bd0ce72796722', 'https://s2.coinmarketcap.com/static/img/coins/64x64/31916.png'],
+  // usdc
+  ['0x833589fcd6edb6e08f4c7c32d4f71b54bda02913', 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png'],
 ]);
 
 export async function GET(request: Request) {
