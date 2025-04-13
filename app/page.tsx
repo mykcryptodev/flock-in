@@ -20,6 +20,7 @@ export default function App() {
   const [lastSuccess, setLastSuccess] = useState<string | null>(null);
   const searchParams = useSearchParams();
   const initialTab = searchParams.get('tab') || TABS[0].name;
+  const initialFid = searchParams.get('fid');
 
   const openUrl = useOpenUrl();
   const { address } = useAccount();
@@ -49,7 +50,7 @@ export default function App() {
         <main className="flex-1 px-4 pb-20 overflow-y-auto mt-8">
           <div className="flex flex-col gap-4">
             {activeTab === "create-request" && (
-              <UserSearch />          
+              <UserSearch initialFid={initialFid || undefined} />          
             )}
             {activeTab === "create-request" && (
               <CreateRequest onSuccess={() => setLastSuccess(new Date().getTime().toString())} />

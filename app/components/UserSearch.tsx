@@ -1,8 +1,11 @@
 import { FC, useState, useEffect } from "react";
 import { useDebounce } from "../hooks/useDebounce";
 import { useUserStore, FarcasterUser } from "../store/userStore";
+interface UserSearchProps {
+  initialFid?: string;
+}
 
-export const UserSearch: FC = () => {
+export const UserSearch: FC<UserSearchProps> = ({ initialFid }) => {
   const [search, setSearch] = useState("");
   const [users, setUsers] = useState<FarcasterUser[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -10,6 +13,32 @@ export const UserSearch: FC = () => {
   
   const { selectedUser, setSelectedUser } = useUserStore();
   const debouncedSearch = useDebounce(search, 500);
+
+  useEffect(() => {
+    const fetchInitialUser = async () => {
+      if (!initialFid) return;
+
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const response = await fetch(`/api/users/get?fids=${initialFid}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch user');
+        }
+        const data = await response.json();
+        if (data.users?.length) {
+          setSelectedUser(data.users[0]);
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchInitialUser();
+  }, [initialFid, setSelectedUser]);
 
   useEffect(() => {
     const searchUsers = async () => {
