@@ -40,7 +40,7 @@ export const Request: FC<Props> = ({ request, onSuccess }) => {
     const requestIsNotCompleted = !request.isCompleted;
     const requestIsNotCancelled = !request.isCancelled;
     return (currentUserIsCompleter || currentUserIsRequester) && requestIsNotCompleted && requestIsNotCancelled;
-  }, [request.completer, address, request.isCompleted, request.isCancelled]);
+  }, [request.requester,request.completer, address, request.isCompleted, request.isCancelled]);
 
   const requestCanBeCompletedByCurrentUser = useMemo(() => {
     const currentUserIsCompleter = isAddressEqual(address ?? '', request.completer);

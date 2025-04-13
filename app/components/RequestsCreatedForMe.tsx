@@ -1,4 +1,4 @@
-import { FC, useEffect, useMemo, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import { getRequestsReceivedByAddress } from "@/thirdweb/8453/0x3ff0ef4d24919e03b5a650f2356bd632c59ef9f6";
 import { useMiniKit } from "@coinbase/onchainkit/minikit";
 import { CHAIN, CONTRACT } from "../constants";
@@ -39,7 +39,7 @@ export const RequestsCreatedForMe: FC<Props> = ({ refreshTrigger }) => {
       setRequests(reversedRequests);
     };
     fetchRequests();
-  }, [context, lastSuccess, refreshTrigger]);
+  }, [address, context, lastSuccess, refreshTrigger]);
 
   const handleAddSuccess = () => {
     setShowAddSuggestedPaymentAmount(false);

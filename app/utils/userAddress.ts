@@ -1,3 +1,5 @@
+import { FarcasterUser } from "@/app/store/userStore";
+
 export async function getUserAddresses(fids: number[]): Promise<Record<number, string>> {
   try {
     const response = await fetch(`/api/users/get?fids=${fids.join(',')}`);
@@ -9,7 +11,7 @@ export async function getUserAddresses(fids: number[]): Promise<Record<number, s
     }
     const data = await response.json();
     // Extract addresses from the users array
-    return data.users.reduce((acc: Record<number, string>, user: any) => {
+    return data.users.reduce((acc: Record<number, string>, user: FarcasterUser) => {
       acc[user.fid] = user.verified_addresses?.primary?.eth_address || user.custody_address;
       return acc;
     }, {});

@@ -119,7 +119,7 @@ export const CreateRequest: FC<Props> = ({ onSuccess }) => {
         data: encodedTx,
       },
     ];
-  }, [selectedUser, videoDescription, completerAddress, token, amount]);
+  }, [videoDescription, completerAddress, token, amount]);
 
   // Function to send notification to the completer
   const sendNotification = useCallback(async () => {
@@ -246,6 +246,7 @@ export const CreateRequest: FC<Props> = ({ onSuccess }) => {
             if (status.statusName === "success" && !hasSeenSuccessRef.current) {
               hasSeenSuccessRef.current = true;
               sendNotification();
+              refetchBalance();
               onSuccess();
             }
           }}

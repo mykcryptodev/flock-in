@@ -1,4 +1,3 @@
-import { useAccount } from "wagmi";
 import { encode, getContract, toUnits } from "thirdweb";
 import { FC, useCallback, useState } from "react";
 import { addSuggestedAmount } from "@/thirdweb/8453/0xf0af2c550b51f3e4fe1b7dcfd4ac8a7093f54b94";
@@ -17,7 +16,6 @@ type Props = {
 }
 
 export const AddSuggestedPaymentAmount: FC<Props> = ({ onSuccess }) => {
-  const { address } = useAccount();
   const [token, setToken] = useState<Token | null>(null);
   const [amount, setAmount] = useState<string>("");
 
@@ -39,7 +37,7 @@ export const AddSuggestedPaymentAmount: FC<Props> = ({ onSuccess }) => {
       to: SUGGESTED_PAYMENT_AMOUNTS_CONTRACT,
       data: encodedTx,
     }];
-  }, [address, token, amount]);
+  }, [token, amount]);
 
   return (
     <div>

@@ -6,9 +6,10 @@ export async function POST(request: Request) {
     const { fid, notification } = body;
 
     const result = await sendFrameNotification({
-      fid,
+      fids: [fid],
       title: notification.title,
       body: notification.body,
+      uuid: notification.uuid,
     });
 
     if (result.state === "error") {

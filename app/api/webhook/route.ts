@@ -86,9 +86,10 @@ export async function POST(request: Request) {
         );
         await setUserNotificationDetails(fid, event.notificationDetails);
         await sendFrameNotification({
-          fid,
+          fids: [fid],
           title: `Welcome to ${appName}`,
           body: `Thank you for adding ${appName}`,
+          uuid: crypto.randomUUID(),
         });
       } else {
         console.log(
@@ -109,9 +110,10 @@ export async function POST(request: Request) {
       console.log("notifications_enabled", event.notificationDetails);
       await setUserNotificationDetails(fid, event.notificationDetails);
       await sendFrameNotification({
-        fid,
+        fids: [fid],
         title: `Welcome to ${appName}`,
         body: `Thank you for enabling notifications for ${appName}`,
+        uuid: crypto.randomUUID(),
       });
 
       break;

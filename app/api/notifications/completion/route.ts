@@ -17,9 +17,10 @@ export async function POST(request: NextRequest) {
 
     // Send the notification using MiniKit's notification system
     const result = await sendFrameNotification({
-      fid: Number(requesterFid),
+      fids: [Number(requesterFid)],
       title: "Request Completed",
       body: `${completerUsername} has completed your video request!`,
+      uuid: crypto.randomUUID(),
     });
 
     if (result.state === "error") {

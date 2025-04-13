@@ -5,9 +5,10 @@ export async function sendRequestNotification(completerFid: number, requesterUse
   try {
     // Send the notification using MiniKit's notification system
     const result = await sendFrameNotification({
-      fid: completerFid,
+      fids: [completerFid],
       title: "New Request",
       body: `${requesterUsername} requested a video: ${message.substring(0, 50)}${message.length > 50 ? '...' : ''}`,
+      uuid: crypto.randomUUID(),
     });
 
     if (result.state === "error") {

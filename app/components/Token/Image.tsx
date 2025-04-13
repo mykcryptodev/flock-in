@@ -7,5 +7,6 @@ export const TokenImage = ({ token, className }: { token: string, className?: st
     fetch(`/api/tokens/image?address=${token}&chain=${CHAIN.name}`).then(res => res.json()).then(data => setImage(data.image));
   }, [token]);
 
+  // eslint-disable-next-line @next/next/no-img-element
   return <img src={image ?? ""} alt={token} className={className} />;
 };
