@@ -10,6 +10,8 @@ import { useReadContract } from "thirdweb/react";
 import { CHAIN } from "../constants";
 import { getContract } from "thirdweb/contract";
 import { createThirdwebClient } from "thirdweb";
+import Link from "next/link";
+import ExternalLink from "../svg/ExternalLink";
 
 const client = createThirdwebClient({
   clientId: process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID!,
@@ -98,6 +100,17 @@ export const Request: FC<Props> = ({ request, onSuccess, hideCompleter = false }
     contract: tokenContract,
     method: "function symbol() public view returns (string)",
   });
+
+  const completionProof = useMemo(() => {
+    if (!request.completionProof) {
+      return '';
+    }
+    const trimmed = request.completionProof.replace('https://', '').slice(0, 15);
+    if (trimmed.length > 15) {
+      return trimmed + '...';
+    }
+    return trimmed;
+  }, [request.completionProof]);
 
   if (loading) {
     return <div>Loading...</div>;
@@ -190,6 +203,13 @@ export const Request: FC<Props> = ({ request, onSuccess, hideCompleter = false }
           )}
         </div>
       </div>
+      {request.completionProof && (
+        <Link href={request.completionProof} className="mt-1 w-full justify-end flex">
+          <span className="text-xs text-end text-gray-500 flex items-center gap-1">
+            {completionProof} <ExternalLink className="w-3 h-3" />
+          </span>
+        </Link>
+      )}
       <div className="mt-1">
         <Review 
           requestId={request.id.toString()} 
