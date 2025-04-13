@@ -42,21 +42,26 @@ export const AddSuggestedPaymentAmount: FC<Props> = ({ onSuccess }) => {
   return (
     <div>
       <h1>Add Suggested Payment Amount</h1>
-      <TokenPicker selectedToken={token} onTokenChange={setToken} />
-      <input 
-        type="number" 
-        value={amount} 
-        onChange={(e) => setAmount(e.target.value)} 
-        className="w-full my-2 p-2 border-2 border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
-      />
-      <Transaction calls={getAddCalls} onSuccess={onSuccess}>
-        <TransactionToast>
-          <TransactionToastIcon />
-          <TransactionToastLabel />
-          <TransactionToastAction />
-        </TransactionToast>
-        <TransactionButton className="bg-blue-500 text-white p-2 rounded-md" text="Add" />
-      </Transaction>
+      <div className="flex flex-col gap-2">
+        <TokenPicker selectedToken={token} onTokenChange={setToken} />
+        {token && (
+          <input 
+            type="number" 
+            value={amount} 
+            onChange={(e) => setAmount(e.target.value)} 
+            placeholder="Enter suggested amount"
+            className="w-full text-center p-2 border-2 border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+          />
+        )}
+        <Transaction calls={getAddCalls} onSuccess={onSuccess}>
+          <TransactionToast>
+            <TransactionToastIcon />
+            <TransactionToastLabel />
+            <TransactionToastAction />
+          </TransactionToast>
+          <TransactionButton className="bg-blue-500 text-white p-2 rounded-md" text="Add" />
+        </Transaction>
+      </div>
     </div>
   );
 };
