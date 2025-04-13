@@ -25,9 +25,10 @@ interface NeynarUser {
 type Props = {
   request: Awaited<ReturnType<typeof getRequestsReceivedByAddress>>[number];
   onSuccess: () => void;
+  hideCompleter?: boolean;
 }
 
-export const Request: FC<Props> = ({ request, onSuccess }) => {
+export const Request: FC<Props> = ({ request, onSuccess, hideCompleter = false }) => {
   const { address } = useAccount();
   const [requesterUser, setRequesterUser] = useState<NeynarUser | null>(null);
   const [completerUser, setCompleterUser] = useState<NeynarUser | null>(null);
@@ -133,24 +134,26 @@ export const Request: FC<Props> = ({ request, onSuccess }) => {
         </div>
         
         {/* Completer section */}
-        <div className="flex items-center space-x-2">
-          {completerUser?.pfp_url && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img 
-              src={completerUser.pfp_url} 
-              alt={completerUser.username || 'Completer'} 
-              className="w-10 h-10 rounded-full"
-            />
-          )}
-          <div>
-            <p className="font-medium">
-              {completerUser?.display_name || completerUser?.username || `User ${request.completer}`}
-            </p>
-            <p className="text-sm text-gray-500">
-              Requested for {completerUser?.username || `@user${request.completer}`}
-            </p>
+        {!hideCompleter && (
+          <div className="flex items-center space-x-2">
+            {completerUser?.pfp_url && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img 
+                src={completerUser.pfp_url} 
+                alt={completerUser.username || 'Completer'} 
+                className="w-10 h-10 rounded-full"
+              />
+            )}
+            <div>
+              <p className="font-medium">
+                {completerUser?.display_name || completerUser?.username || `User ${request.completer}`}
+              </p>
+              <p className="text-sm text-gray-500">
+                Requested for {completerUser?.username || `@user${request.completer}`}
+              </p>
+            </div>
           </div>
-        </div>
+        )}
       </div>
       
       <div className="mt-3">

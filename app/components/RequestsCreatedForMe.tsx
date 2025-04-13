@@ -80,7 +80,12 @@ export const RequestsCreatedForMe: FC<Props> = ({ refreshTrigger }) => {
       )}
       <div>
         {requests.map((request) => (
-          <Request key={request.id.toString()} request={request} onSuccess={() => setLastSuccess(new Date().getTime().toString())} />
+          <Request 
+            key={request.id.toString()} 
+            request={request} 
+            onSuccess={() => setLastSuccess(new Date().getTime().toString())} 
+            hideCompleter={true}
+          />
         ))}
       </div>
     </div>

@@ -9,7 +9,7 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        serif: ["Pixelify Sans", "serif"],
+        sans: ["Segment", "sans-serif"],
       },
       colors: {
         background: "var(--background)",

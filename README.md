@@ -1,6 +1,7 @@
 [ ] Users can leave reviews if their completed video was honored or not
 [ ] Featured users
 [ ] Pay with any token and any amount
+[ ] completion uploads proof that the user taps into from noti
 
 ## Foundry
 
