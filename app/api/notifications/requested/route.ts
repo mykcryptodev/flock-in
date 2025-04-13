@@ -17,8 +17,6 @@ export async function POST(request: NextRequest) {
     const appUrl = process.env.NEXT_PUBLIC_URL || "";
     const neynarApiKey = process.env.NEYNAR_API_KEY;
 
-    console.log({ fids, title, notificationBody, uuid, appUrl, neynarApiKey });
-
     if (!neynarApiKey) {
       return NextResponse.json(
         { error: 'Neynar API key not configured' },
@@ -45,8 +43,6 @@ export async function POST(request: NextRequest) {
     });
 
     const responseJson = await response.json();
-
-    console.log({ responseJson: JSON.stringify(responseJson) });
 
     if (response.status === 200) {
       return NextResponse.json({ state: "success" });

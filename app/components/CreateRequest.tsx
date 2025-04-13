@@ -13,7 +13,6 @@ import { isAddress, parseUnits } from "viem";
 import { SuggestedPaymentAmountsList } from "./SuggestedPaymentAmounts/List";
 import { useReadContract } from "thirdweb/react";
 import { sendFrameNotification } from "@/app/lib/notification-client";
-import { toast } from "react-toastify";
 
 const MAX_CHARS = 300;
 
@@ -135,15 +134,15 @@ export const CreateRequest: FC<Props> = ({ onSuccess }) => {
         body: `${context.user.username} paid ${toTokens(amount, token?.decimals ?? 18)} ${token?.symbol} for a video from you`,
         uuid: requestId,
       });
-      toast.info(`Notification w id ${JSON.stringify(result)}...`);
 
       if (result.state === "error") {
         console.error('Failed to send notification:', result.error);
-        toast.error(`Error sending notification: ${JSON.stringify(result.error)}`);
       }
     } catch (error) {
       console.error('Error sending notification:', error);
-      toast.error(`Error sending notification: ${JSON.stringify(error)}`);
+    } finally {
+      // new request ID
+      setRequestId(crypto.randomUUID());
     }
   }, [completerAddress, context?.user.username, videoDescription, selectedUser?.fid, amount, token, requestId]);
 
@@ -160,7 +159,6 @@ export const CreateRequest: FC<Props> = ({ onSuccess }) => {
   };
 
   const handleSuggestedPaymentAmountClick = async (amount: bigint, token: string) => {
-    console.log("clicked", amount, token);
     const tokenContract = getContract({
       address: token,
       client,
@@ -193,7 +191,6 @@ export const CreateRequest: FC<Props> = ({ onSuccess }) => {
   return (
     <div>
       <h1>Describe Your Video Request</h1>
-      {requestId && <span>Request ID: {requestId}</span>}
       <textarea
         value={videoDescription}
         onChange={handleDescriptionChange}
