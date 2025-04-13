@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
         notification: {
           title,
           body: notificationBody,
-          target_url: appUrl,
+          target_url: `${appUrl}/?tab=requests-for-me`,
           uuid,
         },
         target_fids: fids,

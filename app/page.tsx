@@ -13,16 +13,19 @@ import { RequestsCreatedByMe } from "./components/RequestsCreatedByMe";
 import { RequestsCreatedForMe } from "./components/RequestsCreatedForMe";
 import { Nav } from "./components/Nav";
 import { TABS } from "./constants";
+import { useSearchParams } from 'next/navigation';
 
 export default function App() {
   const { setFrameReady, isFrameReady, context } = useMiniKit();
   const [lastSuccess, setLastSuccess] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+  const initialTab = searchParams.get('tab') || TABS[0].name;
 
   const openUrl = useOpenUrl();
   const { address } = useAccount();
   const { connect } = useConnect(); 
 
-  const [activeTab, setActiveTab] = useState<string>(TABS[0].name);
+  const [activeTab, setActiveTab] = useState<string>(initialTab);
 
   useEffect(() => {
     if (!isFrameReady) {
