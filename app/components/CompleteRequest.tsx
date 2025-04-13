@@ -64,7 +64,7 @@ export const CompleteRequest: FC<Props> = ({ requestId, requesterAddress, onSucc
       
       return true;
     } catch (error) {
-      console.error('Failed to send completion notification');
+      console.error('Failed to send completion notification', error);
       return false;
     } finally {
       notificationInProgressRef.current = false;

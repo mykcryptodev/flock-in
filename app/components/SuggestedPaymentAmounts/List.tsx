@@ -120,3 +120,4 @@ export const SuggestedPaymentAmountsList = memo(({ address, onRemove, showTitle,
     </div>
   );
 });
+SuggestedPaymentAmountsList.displayName = 'SuggestedPaymentAmountsList';
