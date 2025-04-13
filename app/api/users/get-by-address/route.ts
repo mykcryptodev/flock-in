@@ -34,6 +34,7 @@ interface TransformedUser {
   username: string;
   display_name: string;
   pfp_url: string;
+  fid: number;
 }
 
 /**
@@ -93,15 +94,21 @@ export async function GET(request: NextRequest) {
 
     const data = await response.json() as NeynarResponse;
     
+    console.log('Raw Neynar response:', JSON.stringify(data));
+    
     // Transform the response into our expected format
     const users: TransformedUser[] = Object.values(data).flat().map((user) => {
+      console.log('Processing user:', JSON.stringify(user));
       return {
         address: user.verified_addresses.primary.eth_address || user.custody_address,
         username: user.username,
         display_name: user.display_name,
         pfp_url: user.pfp_url,
+        fid: user.fid,
       };
     });
+
+    console.log('Transformed users:', JSON.stringify(users));
 
     const responseData = { users };
     

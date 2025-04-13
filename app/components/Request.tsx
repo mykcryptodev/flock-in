@@ -166,7 +166,7 @@ export const Request: FC<Props> = ({ request, onSuccess }) => {
           {requestCanBeCompletedByCurrentUser && (
             <CompleteRequest 
               requestId={request.id.toString()} 
-              requester={request.requester}
+              requesterAddress={request.requester}
               onSuccess={onSuccess} 
             />
           )}
