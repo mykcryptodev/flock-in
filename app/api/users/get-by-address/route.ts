@@ -65,7 +65,8 @@ export async function GET(request: NextRequest) {
     }
 
     // Create a cache key based on the addresses
-    const cacheKey = `${USER_CACHE_PREFIX}${addresses}`;
+    const normalizedAddresses = addresses.toLowerCase();
+    const cacheKey = `${USER_CACHE_PREFIX}${normalizedAddresses}`;
     
     // Check if we have cached data for these addresses
     const cachedData = await getCachedData(cacheKey);

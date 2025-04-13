@@ -1,4 +1,4 @@
-import { completeRequest } from "@/thirdweb/8453/0x3ff0ef4d24919e03b5a650f2356bd632c59ef9f6";
+import { completeRequest } from "@/thirdweb/8453/0x298688df47fa6ab1e4479f60474d16ad7c37d024";
 import { Transaction, TransactionToastAction, TransactionToastLabel, TransactionToast, TransactionToastIcon } from "@coinbase/onchainkit/transaction";
 import { TransactionButton } from "@coinbase/onchainkit/transaction";
 import { FC, useCallback, useRef, useState, useEffect } from "react";

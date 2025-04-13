@@ -120,6 +120,57 @@ contract FlockInReviewsTest is Test {
         assertEq(bobReviews[1], 2);
     }
 
+    function test_GetFullReviewByReviewee() public {
+        // Create two requests and reviews
+        vm.startPrank(alice);
+        token.approve(address(flockIn), type(uint256).max);
+        flockIn.requestFlockIn(bob, address(token), TEST_AMOUNT, "First message");
+        flockIn.requestFlockIn(bob, address(token), TEST_AMOUNT, "Second message");
+        vm.stopPrank();
+        
+        vm.startPrank(bob);
+        flockIn.completeRequest(0, "");
+        flockIn.completeRequest(1, "");
+        vm.stopPrank();
+        
+        vm.startPrank(alice);
+        reviews.createReview(0, bob, 5, "First review", "");
+        reviews.createReview(1, bob, 4, "Second review", "");
+        vm.stopPrank();
+        
+        // Get full reviews for Bob
+        FlockInReviews.Review[] memory bobReviews = reviews.getFullReviewByReviewee(bob);
+        
+        // Debug assertions
+        assertEq(bobReviews.length, 2, "Expected 2 reviews");
+        
+        // Verify the reviews exist in the mapping
+        FlockInReviews.Review memory review1 = reviews.getReview(1);
+        FlockInReviews.Review memory review2 = reviews.getReview(2);
+        assertEq(review1.id, 1, "Review 1 should exist");
+        assertEq(review2.id, 2, "Review 2 should exist");
+        
+        // Check first review
+        assertEq(bobReviews[0].id, 1, "First review ID mismatch");
+        assertEq(bobReviews[0].requestId, 0, "First review request ID mismatch");
+        assertEq(bobReviews[0].reviewer, alice, "First review reviewer mismatch");
+        assertEq(bobReviews[0].reviewee, bob, "First review reviewee mismatch");
+        assertEq(bobReviews[0].rating, 5, "First review rating mismatch");
+        assertEq(bobReviews[0].comment, "First review", "First review comment mismatch");
+        assertEq(bobReviews[0].revieweeComment, "", "First review reviewee comment mismatch");
+        assertEq(bobReviews[0].reviewCreatedBeforeCompletion, false, "First review completion flag mismatch");
+        
+        // Check second review
+        assertEq(bobReviews[1].id, 2, "Second review ID mismatch");
+        assertEq(bobReviews[1].requestId, 1, "Second review request ID mismatch");
+        assertEq(bobReviews[1].reviewer, alice, "Second review reviewer mismatch");
+        assertEq(bobReviews[1].reviewee, bob, "Second review reviewee mismatch");
+        assertEq(bobReviews[1].rating, 4, "Second review rating mismatch");
+        assertEq(bobReviews[1].comment, "Second review", "Second review comment mismatch");
+        assertEq(bobReviews[1].revieweeComment, "", "Second review reviewee comment mismatch");
+        assertEq(bobReviews[1].reviewCreatedBeforeCompletion, false, "Second review completion flag mismatch");
+    }
+
     function test_RevertWhen_CreateReviewForNonExistentRequest() public {
         vm.startPrank(alice);
         vm.expectRevert();

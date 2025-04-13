@@ -1,6 +1,6 @@
 import { encode, getContract, toUnits } from "thirdweb";
 import { FC, useCallback, useState } from "react";
-import { addSuggestedAmount } from "@/thirdweb/8453/0xf0af2c550b51f3e4fe1b7dcfd4ac8a7093f54b94";
+import { addSuggestedAmount } from "@/thirdweb/8453/0x72503a680c540fb3500561aaa288deb939a24b20";
 import { createThirdwebClient } from "thirdweb";
 import { SUGGESTED_PAYMENT_AMOUNTS_CONTRACT } from "@/app/constants";
 import { CHAIN } from "@/app/constants";

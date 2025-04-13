@@ -88,6 +88,101 @@ export async function flockIn(
 
 
 /**
+ * Represents the parameters for the "getFullReviewByReviewee" function.
+ */
+export type GetFullReviewByRevieweeParams = {
+  reviewee: AbiParameterToPrimitiveType<{"internalType":"address","name":"reviewee","type":"address"}>
+};
+
+/**
+ * Calls the "getFullReviewByReviewee" function on the contract.
+ * @param options - The options for the getFullReviewByReviewee function.
+ * @returns The parsed result of the function call.
+ * @example
+ * ```
+ * import { getFullReviewByReviewee } from "TODO";
+ *
+ * const result = await getFullReviewByReviewee({
+ *  reviewee: ...,
+ * });
+ *
+ * ```
+ */
+export async function getFullReviewByReviewee(
+  options: BaseTransactionOptions<GetFullReviewByRevieweeParams>
+) {
+  return readContract({
+    contract: options.contract,
+    method: [
+  "0x292ed6c7",
+  [
+    {
+      "internalType": "address",
+      "name": "reviewee",
+      "type": "address"
+    }
+  ],
+  [
+    {
+      "components": [
+        {
+          "internalType": "uint256",
+          "name": "id",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "requestId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "reviewer",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "reviewee",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "rating",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string",
+          "name": "comment",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "revieweeComment",
+          "type": "string"
+        },
+        {
+          "internalType": "bytes",
+          "name": "metadata",
+          "type": "bytes"
+        },
+        {
+          "internalType": "bool",
+          "name": "reviewCreatedBeforeCompletion",
+          "type": "bool"
+        }
+      ],
+      "internalType": "struct FlockInReviews.Review[]",
+      "name": "",
+      "type": "tuple[]"
+    }
+  ]
+],
+    params: [options.reviewee]
+  });
+};
+
+
+/**
  * Represents the parameters for the "getReview" function.
  */
 export type GetReviewParams = {

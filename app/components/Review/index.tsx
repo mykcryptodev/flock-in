@@ -1,6 +1,6 @@
 import { CHAIN } from "@/app/constants";
 import { REVIEW_CONTRACT } from "@/app/constants";
-import { getReviewByRequestId } from "@/thirdweb/8453/0x46270a5549d55898fbbe102f5560313903e7576e";
+import { getReviewByRequestId } from "@/thirdweb/8453/0x3fe1eb3912ea77230876eebd133a6a3467e2f93b";
 import { FC, useEffect, useState } from "react";
 import { getContract } from "thirdweb";
 import { createThirdwebClient } from "thirdweb";

@@ -1,7 +1,7 @@
 import { Transaction, TransactionToastLabel, TransactionToast, TransactionToastIcon, TransactionToastAction } from "@coinbase/onchainkit/transaction";
 import { useState } from "react";
 import { TransactionButton } from "@coinbase/onchainkit/transaction";
-import { createReview } from "@/thirdweb/8453/0x46270a5549d55898fbbe102f5560313903e7576e";
+import { createReview } from "@/thirdweb/8453/0x3fe1eb3912ea77230876eebd133a6a3467e2f93b";
 import { encode, getContract } from "thirdweb";
 import { REVIEW_CONTRACT } from "../../constants";
 import { CHAIN } from "../../constants";

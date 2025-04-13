@@ -1,6 +1,6 @@
 import { Transaction, TransactionButton, TransactionToast, TransactionToastAction, TransactionToastIcon, TransactionToastLabel } from "@coinbase/onchainkit/transaction";
 import { FC, useCallback, useMemo, useState, useEffect, useRef } from "react";
-import { requestFlockIn } from "@/thirdweb/8453/0x3ff0ef4d24919e03b5a650f2356bd632c59ef9f6";
+import { requestFlockIn } from "@/thirdweb/8453/0x298688df47fa6ab1e4479f60474d16ad7c37d024";
 import { useUserStore } from "../store/userStore";
 import { createThirdwebClient, encode, getContract, toTokens, ZERO_ADDRESS } from "thirdweb";
 import { CHAIN, CONTRACT, USDC } from "../constants";
@@ -13,6 +13,7 @@ import { isAddress, parseUnits } from "viem";
 import { SuggestedPaymentAmountsList } from "./SuggestedPaymentAmounts/List";
 import { useReadContract } from "thirdweb/react";
 import { sendFrameNotification } from "@/app/lib/notification-client";
+import { ReviewListByCompleter } from "./Review/ListByCompleter";
 
 const MAX_CHARS = 300;
 
@@ -265,6 +266,9 @@ export const CreateRequest: FC<Props> = ({ onSuccess }) => {
       )}
       <div className="text-sm text-gray-500 mt-2 text-right">
         Your balance: {(token?.address && balance) ? toTokens(balance, token?.decimals ?? 18).toString() : "0"}
+      </div>
+      <div className="mt-4">
+        <ReviewListByCompleter />
       </div>
     </div>
   );

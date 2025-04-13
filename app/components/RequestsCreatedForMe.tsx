@@ -1,5 +1,5 @@
 import { FC, useEffect, useState } from "react";
-import { getRequestsReceivedByAddress } from "@/thirdweb/8453/0x3ff0ef4d24919e03b5a650f2356bd632c59ef9f6";
+import { getRequestsReceivedByAddress } from "@/thirdweb/8453/0x298688df47fa6ab1e4479f60474d16ad7c37d024";
 import { useMiniKit } from "@coinbase/onchainkit/minikit";
 import { CHAIN, CONTRACT } from "../constants";
 import { createThirdwebClient, getContract } from "thirdweb";
@@ -63,7 +63,7 @@ export const RequestsCreatedForMe: FC<Props> = ({ refreshTrigger }) => {
             />
           )}
           {showAddSuggestedPaymentAmount ? (
-            <div className="flex flex-col gap-2 px-4 bg-gray-300 rounded-md rounded-t-none">
+            <div className="flex flex-col gap-2 px-4 bg-gray-300 rounded-md rounded-t-none pt-1">
               <AddSuggestedPaymentAmount onSuccess={handleAddSuccess} />
               <button className="bg-gray-500 w-full text-white p-2 rounded-md mb-4" onClick={() => setShowAddSuggestedPaymentAmount(false)}>Cancel</button>
             </div>

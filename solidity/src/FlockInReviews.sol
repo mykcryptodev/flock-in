@@ -125,4 +125,16 @@ contract FlockInReviews {
     function getReviewsByReviewee(address reviewee) external view returns (uint256[] memory) {
         return reviewsByReviewee[reviewee];
     }
+
+    /// @notice Gets all reviews for a given reviewee address
+    /// @param reviewee The address of the reviewee to get reviews for
+    /// @return An array of review IDs
+    function getFullReviewByReviewee(address reviewee) external view returns (Review[] memory) {
+        uint256[] memory reviewIds = reviewsByReviewee[reviewee];
+        Review[] memory result = new Review[](reviewIds.length);
+        for (uint256 i = 0; i < reviewIds.length; i++) {
+            result[i] = reviews[reviewIds[i]];
+        }
+        return result;
+    }
 } 

@@ -1,4 +1,4 @@
-import { removeSuggestedAmount } from "@/thirdweb/8453/0xf0af2c550b51f3e4fe1b7dcfd4ac8a7093f54b94";
+import { removeSuggestedAmount } from "@/thirdweb/8453/0x72503a680c540fb3500561aaa288deb939a24b20";
 import { Transaction, TransactionButton, TransactionToastAction, TransactionToast, TransactionToastIcon, TransactionToastLabel } from "@coinbase/onchainkit/transaction";
 import { FC, useCallback } from "react";
 import { getContract } from "thirdweb/contract";

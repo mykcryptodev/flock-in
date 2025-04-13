@@ -6,8 +6,8 @@ const redis = new Redis({
   token: process.env.UPSTASH_REDIS_REST_TOKEN!,
 });
 
-// Cache duration in seconds (24 hours)
-const CACHE_DURATION = 24 * 60 * 60;
+// Default cache duration in seconds (24 hours)
+const DEFAULT_CACHE_DURATION = 24 * 60 * 60;
 
 export async function getCachedData<T>(key: string): Promise<T | null> {
   try {
@@ -19,9 +19,9 @@ export async function getCachedData<T>(key: string): Promise<T | null> {
   }
 }
 
-export async function setCachedData<T>(key: string, data: T): Promise<void> {
+export async function setCachedData<T>(key: string, data: T, duration?: number): Promise<void> {
   try {
-    await redis.set(key, data, { ex: CACHE_DURATION });
+    await redis.set(key, data, { ex: duration ?? DEFAULT_CACHE_DURATION });
   } catch (error) {
     console.error('Error setting cached data:', error);
   }
@@ -33,4 +33,4 @@ export async function invalidateCache(key: string): Promise<void> {
   } catch (error) {
     console.error('Error invalidating cache:', error);
   }
-} 
+}

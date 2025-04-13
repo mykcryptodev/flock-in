@@ -21,7 +21,8 @@ export async function GET(request: Request) {
 
   try {
     // Create a cache key based on the search query
-    const cacheKey = `${USER_SEARCH_CACHE_PREFIX}${query}`;
+    const normalizedQuery = query.toLowerCase();
+    const cacheKey = `${USER_SEARCH_CACHE_PREFIX}${normalizedQuery}`;
     
     // Check if we have cached data for this search query
     const cachedData = await getCachedData(cacheKey);

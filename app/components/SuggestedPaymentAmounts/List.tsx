@@ -1,5 +1,5 @@
 import { FC, memo, useEffect } from "react";
-import { getSuggestedAmountsByAddress } from "@/thirdweb/8453/0xf0af2c550b51f3e4fe1b7dcfd4ac8a7093f54b94";
+import { getSuggestedAmountsByAddress } from "@/thirdweb/8453/0x72503a680c540fb3500561aaa288deb939a24b20";
 
 import { createThirdwebClient, getContract, toTokens } from "thirdweb";
 import { CHAIN, SUGGESTED_PAYMENT_AMOUNTS_CONTRACT } from "../../constants";
