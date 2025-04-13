@@ -7,8 +7,6 @@ import { useAccount } from "wagmi";
 import Check from "../svg/Check";
 import { TABS } from "../constants";
 import Image from "next/image";
-import { Blobbie } from "thirdweb/react";
-
 const SCHEMA_UID =
   "0x7889a09fb295b0a0c63a3d7903c4f00f7896cca4fa64d2c1313f8547390b7d39";
 

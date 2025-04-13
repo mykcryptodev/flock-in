@@ -14,6 +14,7 @@ import { RequestsCreatedForMe } from "./components/RequestsCreatedForMe";
 import { Nav } from "./components/Nav";
 import { TABS } from "./constants";
 import { useSearchParams } from 'next/navigation';
+import { ShareButton } from "./components/ShareButton";
 
 export default function App() {
   const { setFrameReady, isFrameReady, context } = useMiniKit();
@@ -65,13 +66,7 @@ export default function App() {
         </main>
 
         <footer className="sticky bottom-0 left-0 right-0 flex items-center justify-center p-4 bg-[#E5E5E5]">
-          <button
-            type="button"
-            className="px-2 py-1 flex justify-start rounded-2xl font-semibold opacity-40 border border-black text-xs"
-            onClick={() => openUrl("https://base.org/builders/minikit")}
-          >
-            BUILT ON BASE WITH MINIKIT
-          </button>
+          <ShareButton />
         </footer>
       </div>
     </div>
