@@ -3,7 +3,7 @@
 import {
   useMiniKit,
 } from "@coinbase/onchainkit/minikit";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useAccount, useConnect } from "wagmi";
 import { UserSearch } from "./components/UserSearch";
 import { CreateRequest } from "./components/CreateRequest";
@@ -15,7 +15,7 @@ import { TABS } from "./constants";
 import { useSearchParams } from 'next/navigation';
 import { ShareButton } from "./components/ShareButton";
 
-export default function App() {
+function AppContent() {
   const { setFrameReady, isFrameReady, context } = useMiniKit();
   const [lastSuccess, setLastSuccess] = useState<string | null>(null);
   const searchParams = useSearchParams();
@@ -68,5 +68,13 @@ export default function App() {
         </footer>
       </div>
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <AppContent />
+    </Suspense>
   );
 }
