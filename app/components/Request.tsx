@@ -12,11 +12,13 @@ import { getContract } from "thirdweb/contract";
 import { createThirdwebClient } from "thirdweb";
 import Link from "next/link";
 import ExternalLink from "../svg/ExternalLink";
+import NumAbbr from 'number-abbreviate';
 
 const client = createThirdwebClient({
   clientId: process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID!,
 });
 
+const numAbbr = new NumAbbr();
 interface NeynarUser {
   address: string;
   username: string;
@@ -123,6 +125,7 @@ export const Request: FC<Props> = ({ request, onSuccess, hideCompleter = false, 
 
   // Convert bigint to number for display
   const amountInToken = toTokens(request.amount, decimals ?? 18);
+  const formattedAmount = numAbbr.abbreviate(Number(amountInToken), 2);
 
   return (
     <div className="border rounded-lg p-4 mb-4 shadow-sm">
@@ -178,7 +181,7 @@ export const Request: FC<Props> = ({ request, onSuccess, hideCompleter = false, 
       
       <div className="mt-3 flex justify-between items-center">
         <span className="text-sm font-medium">
-          Amount: {amountInToken} {symbol ?? ''}
+          Amount: {formattedAmount} {symbol ?? ''}
         </span>
         
         <div className="flex space-x-2">
