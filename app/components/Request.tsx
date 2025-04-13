@@ -43,10 +43,10 @@ export const Request: FC<Props> = ({ request, onSuccess }) => {
   }, [request.completer, address, request.isCompleted, request.isCancelled]);
 
   const requestCanBeCompletedByCurrentUser = useMemo(() => {
-    const currentUserIsRequester = isAddressEqual(address ?? '', request.requester);
+    const currentUserIsCompleter = isAddressEqual(address ?? '', request.completer);
     const requestIsNotCompleted = !request.isCompleted;
     const requestIsNotCancelled = !request.isCancelled;
-    return currentUserIsRequester && requestIsNotCompleted && requestIsNotCancelled;
+    return currentUserIsCompleter && requestIsNotCompleted && requestIsNotCancelled;
   }, [address, request]);
 
   useEffect(() => {
