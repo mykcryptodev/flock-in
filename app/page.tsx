@@ -2,7 +2,6 @@
 
 import {
   useMiniKit,
-  useOpenUrl,
 } from "@coinbase/onchainkit/minikit";
 import { useEffect, useState } from "react";
 import { useAccount, useConnect } from "wagmi";
@@ -23,7 +22,6 @@ export default function App() {
   const initialTab = searchParams.get('tab') || TABS[0].name;
   const initialFid = searchParams.get('fid');
 
-  const openUrl = useOpenUrl();
   const { address } = useAccount();
   const { connect } = useConnect(); 
 

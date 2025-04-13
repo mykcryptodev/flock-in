@@ -21,7 +21,7 @@ type Props = {
   completerUser: NeynarUser | null;
 }
 
-export const Review: FC<Props> = ({ requestId, requester, completer, requesterUser, completerUser }) => {
+export const Review: FC<Props> = ({ requestId, requester, completer, requesterUser }) => {
   const [isReviewLoading, setIsReviewLoading] = useState(true);
   const [review, setReview] = useState<Awaited<ReturnType<typeof getReviewByRequestId>> | null>(null);
   const { address } = useAccount();
@@ -81,6 +81,7 @@ export const Review: FC<Props> = ({ requestId, requester, completer, requesterUs
           {requesterUser && (
             <div className="text-xs text-gray-600 flex items-center gap-1">
               {requesterUser.pfp_url && (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img src={requesterUser.pfp_url} alt={requesterUser.username} className="w-4 h-4 rounded-full" />
               )}
               <div>{requesterUser.username}</div>

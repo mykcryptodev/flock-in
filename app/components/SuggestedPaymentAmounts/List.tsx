@@ -72,6 +72,7 @@ export const SuggestedPaymentAmountsList = memo(({ address, onRemove, showTitle,
     }
     return null;
   };
+  TokenAmount.displayName = 'TokenAmount';
 
   const getIcon = (token: string) => async () => {
     const response = await fetch(`/api/tokens/image?chain=${CHAIN}&address=${token}`);

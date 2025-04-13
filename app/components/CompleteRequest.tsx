@@ -5,7 +5,6 @@ import { FC, useCallback, useRef, useState, useEffect } from "react";
 import { createThirdwebClient, encode, getContract } from "thirdweb";
 import { CHAIN, CONTRACT } from "../constants";
 import { useMiniKit } from "@coinbase/onchainkit/minikit";
-import { toast } from "react-toastify";
 
 const client = createThirdwebClient({
   clientId: process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID!,
@@ -60,12 +59,12 @@ export const CompleteRequest: FC<Props> = ({ requestId, requesterAddress, onSucc
       });
 
       if (!response.ok) {
-        toast.error('Failed to send completion notification');
         return false;
       }
       
       return true;
     } catch (error) {
+      console.error('Failed to send completion notification');
       return false;
     } finally {
       notificationInProgressRef.current = false;

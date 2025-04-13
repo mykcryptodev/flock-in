@@ -63,6 +63,7 @@ export const ReviewListByCompleter: FC = () => {
               <div className="flex items-start justify-between mb-2">
                 <div className="flex items-center gap-2">
                   {review.reviewerInfo?.pfp_url && (
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img 
                       src={review.reviewerInfo.pfp_url} 
                       alt={`${review.reviewerInfo.display_name}'s profile`}

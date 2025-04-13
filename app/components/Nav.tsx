@@ -80,6 +80,7 @@ export const Nav: FC<Props> = ({ activeTab, onTabSelect }) => {
                 <Avatar 
                   address={address} 
                   defaultComponent={
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img src={context?.user.pfpUrl} alt="pfp" className="w-6 h-6 rounded-full" />
                   }
                   sizes="sm"
