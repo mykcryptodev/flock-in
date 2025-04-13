@@ -19,7 +19,7 @@ const client = createThirdwebClient({
 });
 
 const numAbbr = new NumAbbr();
-interface NeynarUser {
+export interface NeynarUser {
   address: string;
   username: string;
   display_name: string;
@@ -221,6 +221,8 @@ export const Request: FC<Props> = ({ request, onSuccess, hideCompleter = false, 
           requestId={request.id.toString()} 
           requester={request.requester}
           completer={request.completer}
+          requesterUser={requesterUser}
+          completerUser={completerUser}
         />
       </div>
     </div>
