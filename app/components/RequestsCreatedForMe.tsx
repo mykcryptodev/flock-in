@@ -69,7 +69,7 @@ export const RequestsCreatedForMe: FC<Props> = ({ refreshTrigger }) => {
               <button className="bg-gray-500 w-full text-white p-2 rounded-md mb-4" onClick={() => setShowAddSuggestedPaymentAmount(false)}>Cancel</button>
             </div>
           ) : (
-            <div className="flex flex-col gap-2 px-4 bg-gray-300 rounded-md rounded-t-none pb-4">
+            <div className="flex flex-col gap-2 px-4 bg-gray-300 rounded-md rounded-t-none py-4">
               <button className="bg-blue-500 w-full text-white p-2 rounded-md" onClick={() => setShowAddSuggestedPaymentAmount(true)}>Add Suggested Rate</button>
             </div>
           )}

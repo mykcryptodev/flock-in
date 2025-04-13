@@ -1,5 +1,5 @@
 import { Transaction, TransactionButton, TransactionToast, TransactionToastAction, TransactionToastIcon, TransactionToastLabel } from "@coinbase/onchainkit/transaction";
-import { FC, useCallback, useMemo, useState } from "react";
+import { FC, useCallback, useMemo, useState, useEffect, useRef } from "react";
 import { requestFlockIn } from "@/thirdweb/8453/0x3ff0ef4d24919e03b5a650f2356bd632c59ef9f6";
 import { useUserStore } from "../store/userStore";
 import { createThirdwebClient, encode, getContract, toTokens, ZERO_ADDRESS } from "thirdweb";
@@ -12,6 +12,8 @@ import { Token } from "@coinbase/onchainkit/token";
 import { isAddress, parseUnits } from "viem";
 import { SuggestedPaymentAmountsList } from "./SuggestedPaymentAmounts/List";
 import { useReadContract } from "thirdweb/react";
+import { sendFrameNotification } from "@/app/lib/notification-client";
+import { toast } from "react-toastify";
 
 const MAX_CHARS = 300;
 
@@ -31,6 +33,14 @@ export const CreateRequest: FC<Props> = ({ onSuccess }) => {
   const [token, setToken] = useState<Token | null>(null);
   const [amountInput, setAmountInput] = useState<string>("");
   const [amount, setAmount] = useState<bigint>(BigInt(0));
+  const [requestId, setRequestId] = useState<string>("");
+  const hasSeenSuccessRef = useRef(false);
+
+  // Generate UUID only on client side
+  useEffect(() => {
+    setRequestId(crypto.randomUUID());
+  }, []);
+
   const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const text = e.target.value;
     if (text.length <= MAX_CHARS) {
@@ -114,30 +124,28 @@ export const CreateRequest: FC<Props> = ({ onSuccess }) => {
 
   // Function to send notification to the completer
   const sendNotification = useCallback(async () => {
-    if (!completerAddress || !context?.user.username || !videoDescription) {
+    if (!completerAddress || !context?.user.username || !videoDescription || !selectedUser?.fid || !requestId) {
       return;
     }
 
     try {
-      const response = await fetch('/api/notifications', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          completerAddress,
-          requesterUsername: context.user.username,
-          message: videoDescription,
-        }),
+      const result = await sendFrameNotification({
+        fids: [selectedUser.fid],
+        title: "New video request!",
+        body: `${context.user.username} paid ${toTokens(amount, token?.decimals ?? 18)} ${token?.symbol} for a video from you`,
+        uuid: requestId,
       });
+      toast.info(`Notification w id ${JSON.stringify(result)}...`);
 
-      if (!response.ok) {
-        console.error('Failed to send notification');
+      if (result.state === "error") {
+        console.error('Failed to send notification:', result.error);
+        toast.error(`Error sending notification: ${JSON.stringify(result.error)}`);
       }
     } catch (error) {
       console.error('Error sending notification:', error);
+      toast.error(`Error sending notification: ${JSON.stringify(error)}`);
     }
-  }, [completerAddress, context?.user.username, videoDescription]);
+  }, [completerAddress, context?.user.username, videoDescription, selectedUser?.fid, amount, token, requestId]);
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!token) return;
@@ -185,6 +193,7 @@ export const CreateRequest: FC<Props> = ({ onSuccess }) => {
   return (
     <div>
       <h1>Describe Your Video Request</h1>
+      {requestId && <span>Request ID: {requestId}</span>}
       <textarea
         value={videoDescription}
         onChange={handleDescriptionChange}
@@ -236,6 +245,13 @@ export const CreateRequest: FC<Props> = ({ onSuccess }) => {
       {!approvalRequired && (
         <Transaction
           calls={getTxCalls}
+          onStatus={(status) => {
+            if (status.statusName === "success" && !hasSeenSuccessRef.current) {
+              hasSeenSuccessRef.current = true;
+              sendNotification();
+              onSuccess();
+            }
+          }}
         >
           <TransactionToast>
             <TransactionToastIcon />
