@@ -116,7 +116,18 @@ export const Request: FC<Props> = ({ request, onSuccess, hideCompleter = false, 
   }, [request.completionProof]);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="border rounded-lg p-4 mb-4 shadow-sm">
+        <div className="flex flex-col space-y-4">
+          <div className="flex items-center space-x-2">
+            <div className="w-10 h-10 rounded-full bg-gray-400 animate-pulse"></div>
+          </div>
+          <div className="w-full h-4 bg-gray-400 animate-pulse"></div>
+          <div className="w-full h-4 bg-gray-400 animate-pulse"></div>
+          <div className="w-full h-4 bg-gray-400 animate-pulse"></div>
+        </div>
+      </div>
+    );
   }
 
   if (error) {
