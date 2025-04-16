@@ -65,6 +65,9 @@ function AppContent() {
 
         <footer className="sticky bottom-0 left-0 right-0 flex items-center justify-center p-4 bg-[#E5E5E5]">
           <ShareButton />
+          <span className="text-xs text-gray-500 opacity-10">
+            ifid: {initialFid}
+          </span>
         </footer>
       </div>
     </div>
