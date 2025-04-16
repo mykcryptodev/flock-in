@@ -14,13 +14,36 @@ import { Nav } from "./components/Nav";
 import { TABS } from "./constants";
 import { useSearchParams } from 'next/navigation';
 import { ShareButton } from "./components/ShareButton";
+import { useUserStore } from "./store/userStore";
 
-function AppContent() {
+interface ClientPageProps {
+  fid?: string;
+}
+
+function AppContent({ fid: propFid }: ClientPageProps) {
   const { setFrameReady, isFrameReady, context } = useMiniKit();
   const [lastSuccess, setLastSuccess] = useState<string | null>(null);
   const searchParams = useSearchParams();
+  const { setSelectedUser } = useUserStore();
+  const queryFid = searchParams.get('fid');
+  const fid = propFid || (queryFid || undefined);
   const initialTab = searchParams.get('tab') || TABS[0].name;
-  const initialFid = searchParams.get('fid');
+
+  useEffect(() => {
+    const fetchAndSetUser = async () => {
+      if (!fid) return;
+      
+      try {
+        const response = await fetch(`/api/user/${fid}`);
+        const user = await response.json();
+        setSelectedUser(user);
+      } catch (error) {
+        console.error('Error fetching user:', error);
+      }
+    };
+
+    fetchAndSetUser();
+  }, [fid, setSelectedUser]);
 
   const { address } = useAccount();
   const { connect } = useConnect(); 
@@ -49,7 +72,7 @@ function AppContent() {
         <main className="flex-1 px-4 pb-20 overflow-y-auto mt-8">
           <div className="flex flex-col gap-4">
             {activeTab === "create-request" && (
-              <UserSearch initialFid={initialFid || undefined} />          
+              <UserSearch initialFid={fid} />          
             )}
             {activeTab === "create-request" && (
               <CreateRequest onSuccess={() => setLastSuccess(new Date().getTime().toString())} />
@@ -66,7 +89,7 @@ function AppContent() {
         <footer className="sticky bottom-0 left-0 right-0 flex items-center justify-center p-4 bg-[#E5E5E5]">
           <ShareButton />
           <span className="text-xs text-gray-500 opacity-10">
-            ifid: {initialFid}
+            ifid: {fid}
           </span>
         </footer>
       </div>
@@ -74,10 +97,10 @@ function AppContent() {
   );
 }
 
-export default function ClientPage() {
+export default function ClientPage({ fid }: ClientPageProps) {
   return (
     <Suspense fallback={<div>Loading...</div>}>
-      <AppContent />
+      <AppContent fid={fid} />
     </Suspense>
   );
 } 

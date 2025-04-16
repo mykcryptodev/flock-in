@@ -21,6 +21,7 @@ export const ReviewListByCompleter: FC = () => {
 
   useEffect(() => {
     const fetchReviews = async () => {
+      setReviews([]);
       if (!selectedUser) {
         setIsLoading(false);
         return;
