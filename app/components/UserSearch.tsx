@@ -18,11 +18,20 @@ export const UserSearch: FC<UserSearchProps> = ({ initialFid }) => {
     const fetchInitialUser = async () => {
       if (!initialFid) return;
 
+      // If we have a stored user and it matches the initialFid, no need to fetch
+      if (selectedUser?.fid === parseInt(initialFid, 10)) {
+        return;
+      }
+
       setIsLoading(true);
       setError(null);
 
       try {
-        const response = await fetch(`/api/users/get?fids=${initialFid}`);
+        const fidNumber = parseInt(initialFid, 10);
+        if (isNaN(fidNumber)) {
+          throw new Error('Invalid FID format');
+        }
+        const response = await fetch(`/api/users/get?fids=${fidNumber}`);
         if (!response.ok) {
           throw new Error('Failed to fetch user');
         }
@@ -38,7 +47,7 @@ export const UserSearch: FC<UserSearchProps> = ({ initialFid }) => {
     };
 
     fetchInitialUser();
-  }, [initialFid, setSelectedUser]);
+  }, [initialFid, setSelectedUser, selectedUser]);
 
   useEffect(() => {
     const searchUsers = async () => {
