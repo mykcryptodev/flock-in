@@ -6,6 +6,8 @@ import { Providers } from "./providers";
 import { ToastContainer } from "react-toastify";
 import { WelcomeModal } from "./components/WelcomeModal";
 
+export const dynamic = 'force-dynamic';
+
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
@@ -18,7 +20,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const URL = process.env.NEXT_PUBLIC_URL;
   const urlSearchParams = new URLSearchParams();
-  const fid = searchParams.fid;
+  const fid = searchParams?.fid;
   
   if (fid) {
     urlSearchParams.set('fid', fid?.toString());
