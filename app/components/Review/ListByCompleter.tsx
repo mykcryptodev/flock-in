@@ -21,10 +21,16 @@ export const ReviewListByCompleter: FC = () => {
 
   useEffect(() => {
     const fetchReviews = async () => {
-      if (!selectedUser) return;
+      if (!selectedUser) {
+        setIsLoading(false);
+        return;
+      }
       
       const address = selectedUser.verified_addresses?.primary?.eth_address ?? selectedUser.custody_address;
-      if (!address) return;
+      if (!address) {
+        setIsLoading(false);
+        return;
+      }
       
       setIsLoading(true);
       try {
