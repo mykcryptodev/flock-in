@@ -13,6 +13,15 @@ export const viewport: Viewport = {
 
 export async function generateMetadata(): Promise<Metadata> {
   const URL = process.env.NEXT_PUBLIC_URL;
+  const searchParams = new URLSearchParams();
+  const fid = process.env.NEXT_PUBLIC_FID;
+  
+  if (fid) {
+    searchParams.set('fid', fid);
+  }
+  
+  const imageUrl = `${URL}/api/frame?${searchParams.toString()}`;
+
   return {
     title: process.env.NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME,
     description:
@@ -20,7 +29,7 @@ export async function generateMetadata(): Promise<Metadata> {
     other: {
       "fc:frame": JSON.stringify({
         version: process.env.NEXT_PUBLIC_VERSION,
-        imageUrl: process.env.NEXT_PUBLIC_IMAGE_URL,
+        imageUrl,
         button: {
           title: `Launch ${process.env.NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME}`,
           action: {
