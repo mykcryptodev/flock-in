@@ -16,10 +16,7 @@ export const UserSearch: FC<UserSearchProps> = ({ initialFid }) => {
 
   useEffect(() => {
     const fetchInitialUser = async () => {
-      if (!initialFid) return;
-
-      // If we have a stored user and it matches the initialFid, no need to fetch
-      if (selectedUser?.fid === parseInt(initialFid, 10)) {
+      if (!initialFid) {
         return;
       }
 
@@ -47,7 +44,8 @@ export const UserSearch: FC<UserSearchProps> = ({ initialFid }) => {
     };
 
     fetchInitialUser();
-  }, [initialFid, setSelectedUser, selectedUser]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialFid, setSelectedUser]);
 
   useEffect(() => {
     const searchUsers = async () => {
