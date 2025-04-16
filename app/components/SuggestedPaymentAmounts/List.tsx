@@ -35,6 +35,7 @@ export const SuggestedPaymentAmountsList = memo(({ address, onRemove, showTitle,
 
   useEffect(() => {
     const fetchUserPreferredPaymentAmounts = async () => {
+      setUserPreferredPaymentAmounts([]);
       const amounts = await getSuggestedAmountsByAddress({
         contract: getContract({
           client: client,
