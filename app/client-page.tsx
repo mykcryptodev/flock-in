@@ -15,6 +15,7 @@ import { TABS } from "./constants";
 import { useSearchParams } from 'next/navigation';
 import { ShareButton } from "./components/ShareButton";
 import { useUserStore } from "./store/userStore";
+import { TrendingUsers } from "./components/TrendingUsers";
 
 interface ClientPageProps {
   fid?: string;
@@ -72,7 +73,10 @@ function AppContent({ fid: propFid }: ClientPageProps) {
         <main className="flex-1 px-4 pb-20 overflow-y-auto mt-8">
           <div className="flex flex-col gap-4">
             {activeTab === "create-request" && (
-              <UserSearch initialFid={fid} />          
+              <div className="flex flex-col gap-2">
+                <TrendingUsers />
+                <UserSearch initialFid={fid} />          
+              </div>
             )}
             {activeTab === "create-request" && (
               <CreateRequest onSuccess={() => setLastSuccess(new Date().getTime().toString())} />
