@@ -11,16 +11,20 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: { [key: string]: string | string[] | undefined }
+}): Promise<Metadata> {
   const URL = process.env.NEXT_PUBLIC_URL;
-  const searchParams = new URLSearchParams();
-  const fid = process.env.NEXT_PUBLIC_FID;
+  const urlSearchParams = new URLSearchParams();
+  const fid = searchParams.fid;
   
   if (fid) {
-    searchParams.set('fid', fid);
+    urlSearchParams.set('fid', fid?.toString());
   }
   
-  const imageUrl = `${URL}/api/frame?${searchParams.toString()}`;
+  const imageUrl = `${URL}/api/frame?${urlSearchParams.toString()}`;
 
   return {
     title: process.env.NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME,
