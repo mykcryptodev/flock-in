@@ -21,7 +21,7 @@
     "react-dom": "^18",
     "react-toastify": "^11.0.5",
     "satori": "^0.12.2",
-    "thirdweb": "^5.93.14",
+    "thirdweb": "^5.95.3",
     "viem": "^2.21.33",
     "wagmi": "^2.11.0",
     "zustand": "^5.0.3"
